@@ -164,8 +164,11 @@ Criterios de aceptación:
 - El sistema controla el total de unidades y las unidades disponibles.
 - El administrador puede consultar y actualizar la información del implemento.
 - El sistema permite realizar una baja lógica.
+- La referencia continúa siendo única y no puede reutilizarse después de una baja lógica.
 - No se permite eliminar físicamente un implemento que tenga operaciones históricas asociadas.
 - No se permite asignar una cantidad disponible inferior a cero ni superior al total de unidades.
+- Al actualizar el total de unidades, el sistema conserva las unidades prestadas y recalcula las disponibles.
+- No se permite reducir el total de unidades por debajo de la cantidad actualmente prestada.
 
 ### HU-04. Buscar y consultar implementos
 
@@ -182,7 +185,10 @@ Criterios de aceptación:
 - El sistema permite buscar implementos por su información de identificación.
 - Se muestra la categoría correspondiente.
 - Se muestran el total de unidades y las unidades disponibles.
+- El administrador puede consultar implementos activos, inactivos o todos.
+- El entrenador solamente puede consultar implementos activos.
 - Los implementos dados de baja no aparecen como disponibles para nuevos préstamos.
+- Un implemento inactivo no puede utilizarse en nuevos préstamos.
 
 ### HU-05. Gestionar deportistas
 

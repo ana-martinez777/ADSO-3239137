@@ -145,6 +145,25 @@ Reglas:
 - Los implementos se eliminan mediante baja lógica.
 - La referencia permanece reservada incluso después de la baja lógica.
 - Los registros relacionados con préstamos no se eliminan físicamente.
+- La referencia puede actualizarse, siempre que se mantenga su unicidad global y no se reutilice una referencia que haya pertenecido a otro implemento.
+- Cuando se actualiza total_units, available_units se recalcula conservando las unidades que actualmente están prestadas.
+- El nuevo total no puede ser inferior a la cantidad de unidades prestadas.
+
+El cálculo de unidades disponibles se realiza de la siguiente manera:
+
+loaned_units = total_units - available_units
+
+available_units = new_total_units - loaned_units
+
+Ejemplo:
+
+- Total anterior: 10 unidades.
+- Unidades disponibles: 7 unidades.
+- Unidades prestadas: 3 unidades.
+- Nuevo total: 12 unidades.
+- Nuevas unidades disponibles: 9 unidades.
+
+Si el nuevo total es inferior a las unidades prestadas, la actualización debe rechazarse para evitar inconsistencias en el inventario.
 
 La columna deleted_at tiene el siguiente comportamiento:
 
@@ -278,6 +297,20 @@ Las claves primarias UUID no se modifican. Las relaciones utilizan ON UPDATE RES
 - Las operaciones de préstamo y devolución deben mantener la consistencia del inventario.
 - Los implementos dados de baja no pueden utilizarse en nuevos préstamos.
 - Las devoluciones de implementos dados de baja siguen permitidas.
+- Las unidades prestadas se calculan mediante la diferencia entre total_units y available_units.
+- Al actualizar total_units, available_units debe recalcularse conservando las unidades prestadas.
+- El nuevo total no puede ser inferior a las unidades prestadas.
+- La actualización del total y de las unidades disponibles debe realizarse de forma atómica para evitar inconsistencias.
+
+La condición general del inventario es:
+
+0 <= available_units <= total_units
+
+Cuando se modifica el total:
+
+loaned_units = total_units - available_units
+
+available_units = new_total_units - loaned_units
 
 ### 6.2 Préstamos
 
@@ -354,6 +387,21 @@ El bloqueo del implemento evita actualizaciones concurrentes que produzcan incon
 
 Si ocurre un error durante cualquiera de estas operaciones, la transacción debe revertirse para evitar inconsistencias.
 
+### Para actualizar el total de unidades
+
+1. Iniciar una transacción.
+2. Bloquear el registro del implemento mediante SELECT ... FOR UPDATE.
+3. Consultar el total actual de unidades y las unidades disponibles.
+4. Calcular las unidades actualmente prestadas mediante la diferencia entre total_units y available_units.
+5. Verificar que el nuevo total sea igual o superior a las unidades prestadas.
+6. Actualizar total_units con el nuevo valor.
+7. Recalcular available_units restando las unidades prestadas al nuevo total.
+8. Confirmar la transacción.
+
+Si el nuevo total es inferior a las unidades prestadas, la operación debe rechazarse y la transacción debe revertirse.
+
+La actualización de total_units y available_units debe confirmarse como una sola operación para conservar la integridad del inventario.
+
 ## 8. Índices y restricciones de unicidad
 
 Se deben establecer índices para las claves foráneas, las restricciones de unicidad y las consultas principales.
@@ -426,6 +474,8 @@ El reporte no requiere una tabla adicional, ya que sus datos se obtienen mediant
 - Las conexiones de Laravel con MySQL deben utilizar UTC.
 - Los bloqueos transaccionales deben respetar el orden definido para evitar inconsistencias y reducir el riesgo de interbloqueos.
 - Las restricciones CHECK deben implementarse en las migraciones y validarse también desde la aplicación.
+- La actualización de total_units y available_units debe realizarse dentro de una misma transacción.
+- El cálculo de unidades prestadas debe conservar la diferencia entre el total y las unidades disponibles antes de modificar el inventario.
 - No se crean tablas adicionales para reportes, multas o auditorías que no estén contempladas en el alcance.
 
 ## 11. Resumen del modelo
