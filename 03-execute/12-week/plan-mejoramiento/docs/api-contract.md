@@ -86,7 +86,7 @@ Los errores no deben incluir:
 | `NOT_FOUND` | 404 | El recurso solicitado no existe o está dado de baja |
 | `USERNAME_ALREADY_EXISTS` | 409 | El nombre de usuario ya está registrado |
 | `DOCUMENT_NUMBER_ALREADY_EXISTS` | 409 | El documento del deportista ya está registrado |
-| `REFERENCE_ALREADY_EXISTS` | 409 | La referencia del implemento ya está registrada |
+| `REFERENCE_ALREADY_EXISTS` | 409 | La referencia ya fue utilizada anteriormente y permanece reservada permanentemente |
 | `CATEGORY_NOT_FOUND` | 404 | La categoría solicitada no existe |
 | `EQUIPMENT_NOT_AVAILABLE` | 409 | No existen unidades disponibles o se produjo un conflicto de disponibilidad |
 | `EQUIPMENT_INACTIVE` | 409 | El implemento está dado de baja y no puede utilizarse en nuevos préstamos |
@@ -98,10 +98,11 @@ Los errores no deben incluir:
 | `INVALID_DATE_RANGE` | 422 | La fecha inicial es posterior a la fecha final |
 
 ## 7. Endpoints
-Todas las rutas de esta sección se expresan con el prefijo `/api/v1`.
+Todas las rutas de esta sección se expresan de forma relativa al prefijo `/api/v1`. Para obtener la ruta completa, se debe anteponer dicho prefijo.
 
 ### 7.1 Autenticación y salud
-| Método | Ruta | Acceso | Descripción |
+
+| Método | Ruta relativa | Acceso | Descripción |
 |---|---|---|---|
 | POST | `/auth/login` | Público | Autentica un usuario y devuelve un token |
 | GET | `/health` | Público | Comprueba el estado de la API |
@@ -290,11 +291,14 @@ Respuesta HTTP 201:
     }
 
 Reglas:
+
 - La referencia es obligatoria y única.
 - La categoría debe existir.
-- El total de unidades debe ser igual o superior a uno.
+- El total de unidades debe ser igual o superior a una.
 - Las unidades disponibles se inicializan con el total registrado.
-- No se permite registrar referencias duplicadas, incluso si pertenecen a implementos dados de baja.
+- No se permite registrar una referencia que aparezca en EquipmentReferenceHistory, aunque pertenezca a un implemento dado de baja o que haya cambiado su referencia.
+- Al crear el implemento, su referencia se registra permanentemente en EquipmentReferenceHistory dentro de la misma transacción.
+- Si la referencia ya fue utilizada, responde HTTP 409 `REFERENCE_ALREADY_EXISTS`.
 
 #### PUT `/equipment/{id}`
 Petición:
@@ -308,9 +312,14 @@ Petición:
 La actualización permite modificar la referencia, la categoría y el total de unidades.
 
 Reglas:
+
 - La referencia puede modificarse después del registro.
-- La nueva referencia debe ser única globalmente.
-- No se permite utilizar una referencia reservada por otro implemento, incluso si está dado de baja.
+- Si la referencia enviada es igual a la referencia actual, se conserva sin generar un nuevo registro histórico.
+- Si la referencia cambia, la nueva referencia no debe existir en EquipmentReferenceHistory.
+- No se permite utilizar una referencia que haya sido asignada anteriormente a cualquier implemento, incluso si está dado de baja o si perteneció al mismo implemento.
+- Cada nueva referencia se registra permanentemente en EquipmentReferenceHistory.
+- El registro histórico y la actualización de Equipment se realizan dentro de una misma transacción.
+- Si la referencia ya fue utilizada, responde HTTP 409 `REFERENCE_ALREADY_EXISTS`.
 - La categoría debe existir.
 - El total de unidades debe ser igual o superior a uno.
 - Al modificar `total_units`, se conservan las unidades actualmente prestadas.
@@ -329,7 +338,7 @@ Reglas:
 - Conserva el historial de préstamos.
 - No permite utilizar el implemento en nuevos préstamos.
 - Las devoluciones pendientes continúan permitidas.
-- La referencia no queda disponible para reutilizarse.
+- La referencia actual y todas las referencias históricas del implemento permanecen reservadas permanentemente en EquipmentReferenceHistory.
 
 Respuesta HTTP 204.
 
