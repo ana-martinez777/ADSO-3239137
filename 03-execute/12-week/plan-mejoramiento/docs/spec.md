@@ -164,7 +164,8 @@ Criterios de aceptación:
 - El sistema controla el total de unidades y las unidades disponibles.
 - El administrador puede consultar y actualizar la información del implemento.
 - El sistema permite realizar una baja lógica.
-- La referencia continúa siendo única y no puede reutilizarse después de una baja lógica.
+- Toda referencia utilizada queda reservada permanentemente y no puede reutilizarse, incluso si el implemento cambia su referencia actual o se da de baja.
+- El sistema conserva el historial de todas las referencias asignadas a cada implemento.
 - No se permite eliminar físicamente un implemento que tenga operaciones históricas asociadas.
 - No se permite asignar una cantidad disponible inferior a cero ni superior al total de unidades.
 - Al actualizar el total de unidades, el sistema conserva las unidades prestadas y recalcula las disponibles.
@@ -218,9 +219,8 @@ Criterios de aceptación:
 Criterios de aceptación:
 
 - El entrenador selecciona un deportista registrado.
-- El préstamo puede incluir uno o varios implementos, siempre que el total de implementos pendientes de devolución del deportista no supere tres.
+- El préstamo puede incluir uno o varios implementos y una o varias unidades de cada uno, siempre que el total de unidades pendientes de devolución del deportista, incluyendo el nuevo préstamo, no supere tres.
 - El sistema verifica que cada implemento tenga unidades disponibles.
-- El sistema verifica que el deportista no tenga tres o más implementos pendientes de devolución.
 - El sistema verifica que el deportista no tenga préstamos vencidos.
 - La fecha de vencimiento se calcula a partir de la fecha del préstamo y el plazo de dos días.
 - El sistema registra qué entrenador realizó la operación.
@@ -311,7 +311,7 @@ El sistema debe impedir operaciones que dejen cantidades fuera de ese intervalo.
 
 ### RN-02. Límite y plazo de préstamos
 
-Cada deportista puede tener como máximo tres implementos pendientes de devolución.
+Cada deportista puede tener como máximo tres unidades pendientes de devolución, independientemente de la cantidad de referencias de implementos involucradas.
 
 El plazo de devolución de cada implemento prestado es de dos días, calculados a partir de la fecha del préstamo.
 

@@ -87,17 +87,19 @@ Las reglas que no puedan garantizarse directamente mediante el esquema deben pro
 
 **Verificación:** comparar las restricciones del modelo de datos con las migraciones y comprobar su cumplimiento mediante pruebas.
 
-## Artículo VII — Lo derivado se calcula, no se almacena
+## Artículo VII — Los estados derivados se calculan y los contadores operativos se mantienen de forma consistente
 
-Los estados y valores que puedan obtenerse a partir de la información registrada deben calcularse cuando corresponda, evitando almacenar información redundante que pueda quedar inconsistente.
+Los estados que puedan obtenerse a partir de la información registrada deben calcularse cuando corresponda, evitando almacenar información redundante que pueda quedar inconsistente.
 
 El estado de un préstamo debe determinarse de acuerdo con las fechas, el plazo de dos días y la información de devolución.
 
 La condición de vencido debe calcularse considerando el momento actual en UTC y la fecha de vencimiento.
 
-**Por qué:** evita inconsistencias entre los datos almacenados y los valores derivados.
+La disponibilidad de los implementos constituye una excepción operativa: el campo available_units se mantiene almacenado para controlar el inventario y debe actualizarse transaccionalmente durante los préstamos, las devoluciones y las modificaciones de unidades totales.
 
-**Verificación:** comprobar que el modelo de datos y las pruebas permitan determinar correctamente los estados de los préstamos sin depender de información redundante.
+**Por qué:** evita inconsistencias entre los estados derivados y la información almacenada, manteniendo al mismo tiempo un control consistente de las unidades disponibles.
+
+**Verificación:** comprobar que los estados de los préstamos se calculen a partir de los datos correspondientes y que available_units se mantenga dentro de los límites definidos por el modelo de datos.
 
 ## Artículo VIII — Los valores congelados no siguen al catálogo
 

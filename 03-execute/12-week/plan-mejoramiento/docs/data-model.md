@@ -35,7 +35,7 @@ No se contemplan columnas de auditoría created_at y updated_at, porque no forma
 
 ## 3. Entidades
 
-El modelo está compuesto por seis entidades:
+El modelo está compuesto por siete entidades:
 
 1. User
 2. Athlete
@@ -43,6 +43,7 @@ El modelo está compuesto por seis entidades:
 4. Equipment
 5. Loan
 6. LoanItem
+7. EquipmentReferenceHistory
 
 ### 3.1 User
 
@@ -135,17 +136,17 @@ Relaciones:
 Reglas:
 
 - La referencia es única globalmente.
-- Una referencia no puede reutilizarse después de dar de baja un implemento.
+- Toda referencia utilizada debe registrarse en EquipmentReferenceHistory.
+- Una referencia no puede reutilizarse después de haber sido asignada a un implemento, incluso si posteriormente cambia su referencia o se da de baja.
 - La cantidad total debe ser igual o superior a una unidad.
 - Las unidades disponibles nunca pueden ser negativas.
 - Las unidades disponibles no pueden superar el total registrado.
 - Un implemento dado de baja no puede utilizarse en nuevos préstamos.
 - Las devoluciones de préstamos anteriores siguen permitidas aunque el implemento esté dado de baja.
-- Un implemento puede reactivarse conservando su identificador y su historial.
 - Los implementos se eliminan mediante baja lógica.
 - La referencia permanece reservada incluso después de la baja lógica.
 - Los registros relacionados con préstamos no se eliminan físicamente.
-- La referencia puede actualizarse, siempre que se mantenga su unicidad global y no se reutilice una referencia que haya pertenecido a otro implemento.
+- La referencia puede actualizarse, siempre que la nueva referencia nunca haya sido utilizada anteriormente.
 - Cuando se actualiza total_units, available_units se recalcula conservando las unidades que actualmente están prestadas.
 - El nuevo total no puede ser inferior a la cantidad de unidades prestadas.
 
@@ -255,6 +256,38 @@ Un detalle se considera vencido cuando:
 - La fecha y hora actual es igual o posterior a due_at.
 - returned_at permanece en NULL.
 
+### 3.7 EquipmentReferenceHistory
+
+Representa el historial permanente de referencias utilizadas por los implementos deportivos.
+
+Cada referencia se registra una sola vez y permanece reservada aunque el implemento cambie su referencia actual o sea dado de baja.
+
+| Atributo | Tipo lógico | Tipo físico | Restricciones | Descripción |
+|---|---|---|---|---|
+| reference | String | VARCHAR(120) | PK | Referencia utilizada históricamente |
+| equipment_id | UUID | CHAR(36) | FK, NOT NULL | Implemento al que fue asignada la referencia |
+
+Relaciones:
+
+- Cada registro pertenece a un implemento.
+- Un implemento puede tener varias referencias históricas.
+
+Reglas:
+
+- Cada referencia utilizada debe registrarse en esta tabla.
+- La referencia es única globalmente mediante la clave primaria.
+- Una referencia registrada no puede actualizarse ni eliminarse.
+- Una referencia registrada no puede asignarse nuevamente a otro implemento.
+- Una referencia anterior tampoco puede volver a asignarse al mismo implemento.
+- La primera referencia se registra durante la creación del implemento.
+- Cada cambio de referencia registra una nueva fila.
+- La referencia actual del implemento debe existir en esta tabla.
+- La tabla conserva sus registros incluso cuando el implemento asociado se da de baja.
+- La relación con Equipment utiliza ON DELETE RESTRICT.
+- La clave primaria garantiza la unicidad de cada referencia.
+- Los casos de uso y los adaptadores de persistencia deben impedir la actualización y eliminación de registros históricos.
+- Las pruebas automatizadas deben verificar que las referencias históricas permanezcan inmutables.
+
 ## 4. Relaciones entre entidades
 
 | Entidad origen | Entidad destino | Cardinalidad | Descripción |
@@ -264,6 +297,7 @@ Un detalle se considera vencido cuando:
 | User | Loan | 1:N | Un usuario puede registrar varios préstamos |
 | Loan | LoanItem | 1:N | Un préstamo contiene uno o varios detalles |
 | Equipment | LoanItem | 1:N | Un implemento puede aparecer en varios detalles históricos |
+| Equipment | EquipmentReferenceHistory | 1:N | Un implemento puede tener varias referencias históricas reservadas |
 
 ## 5. Integridad referencial
 
@@ -276,6 +310,7 @@ Todas las claves foráneas utilizan la política ON DELETE RESTRICT.
 | Loan.user_id → User.id | RESTRICT |
 | LoanItem.loan_id → Loan.id | RESTRICT |
 | LoanItem.equipment_id → Equipment.id | RESTRICT |
+| EquipmentReferenceHistory.equipment_id → Equipment.id | RESTRICT |
 
 No se utilizan eliminaciones en cascada.
 
@@ -402,6 +437,33 @@ Si el nuevo total es inferior a las unidades prestadas, la operación debe recha
 
 La actualización de total_units y available_units debe confirmarse como una sola operación para conservar la integridad del inventario.
 
+### Registro y actualización de referencias históricas
+
+El registro y cambio de referencias debe realizarse transaccionalmente.
+
+#### Creación de un implemento
+
+1. Iniciar una transacción.
+2. Verificar que la referencia no exista en EquipmentReferenceHistory.
+3. Crear el registro de Equipment.
+4. Registrar la referencia en EquipmentReferenceHistory asociándola al identificador del implemento.
+5. Confirmar la transacción.
+
+#### Actualización de una referencia
+
+1. Iniciar una transacción.
+2. Bloquear el registro del implemento mediante SELECT ... FOR UPDATE.
+3. Comparar la nueva referencia con la referencia actual.
+4. Si no existe cambio, conservar la referencia sin insertar otro registro histórico.
+5. Si existe cambio, verificar que la nueva referencia no aparezca en EquipmentReferenceHistory.
+6. Registrar la nueva referencia asociándola al mismo implemento.
+7. Actualizar la referencia actual en Equipment.
+8. Confirmar la transacción.
+
+Si la nueva referencia ya aparece en EquipmentReferenceHistory, la operación debe rechazarse y la transacción debe revertirse.
+
+Los registros históricos de referencias nunca se actualizan ni se eliminan.
+
 ## 8. Índices y restricciones de unicidad
 
 Se deben establecer índices para las claves foráneas, las restricciones de unicidad y las consultas principales.
@@ -420,6 +482,8 @@ Se deben establecer índices para las claves foráneas, las restricciones de uni
 | Equipment | INDEX(category_id, reference) | Consultar implementos por categoría y referencia |
 | Equipment | CHECK(total_units >= 1) | Garantizar al menos una unidad total |
 | Equipment | CHECK(available_units >= 0 AND available_units <= total_units) | Mantener la disponibilidad dentro de los límites |
+| EquipmentReferenceHistory | PRIMARY KEY(reference) | Garantizar que cada referencia histórica sea única y permanente |
+| EquipmentReferenceHistory | INDEX(equipment_id) | Consultar las referencias históricas de un implemento |
 | Loan | PRIMARY KEY(id) | Identificar préstamos |
 | Loan | INDEX(athlete_id, loaned_at) | Consultar préstamos de un deportista por fecha |
 | Loan | INDEX(user_id) | Consultar préstamos registrados por usuario |
@@ -477,6 +541,8 @@ El reporte no requiere una tabla adicional, ya que sus datos se obtienen mediant
 - La actualización de total_units y available_units debe realizarse dentro de una misma transacción.
 - El cálculo de unidades prestadas debe conservar la diferencia entre el total y las unidades disponibles antes de modificar el inventario.
 - No se crean tablas adicionales para reportes, multas o auditorías que no estén contempladas en el alcance.
+- EquipmentReferenceHistory forma parte del modelo de dominio y garantiza la reserva permanente de referencias. No constituye una tabla de auditoría.
+- La unicidad de EquipmentReferenceHistory.reference debe ser garantizada por la clave primaria de MySQL, incluso ante operaciones concurrentes.
 
 ## 11. Resumen del modelo
 
@@ -488,5 +554,6 @@ El reporte no requiere una tabla adicional, ya que sus datos se obtienen mediant
 | Equipment | Inventario de implementos deportivos |
 | Loan | Operación general de préstamo |
 | LoanItem | Detalle, cantidad entregada y devolución del implemento |
+| EquipmentReferenceHistory | Conservación permanente de referencias utilizadas |
 
 Este modelo busca garantizar la integridad del inventario, la trazabilidad de las operaciones y la conservación del historial de préstamos y devoluciones.

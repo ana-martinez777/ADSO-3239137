@@ -76,6 +76,7 @@ La estructura de persistencia deberá representar, como mínimo, la información
 - Usuarios y roles.
 - Categorías de implementos.
 - Catálogo de implementos.
+- Historial permanente de referencias utilizadas.
 - Deportistas.
 - Préstamos.
 - Detalle de los implementos incluidos en cada préstamo.
@@ -94,11 +95,11 @@ Se deberán contemplar:
 
 Los atributos definitivos y las relaciones se especificarán en `data-model.md`.
 
-El motor de base de datos seleccionado para Sports Gear es MySQL.
+El motor de base de datos seleccionado para Sports Gear es MySQL 8.4, utilizando InnoDB como motor de almacenamiento.
 
-La configuración de conexión, las migraciones y las restricciones de integridad deberán ser compatibles con MySQL.
+La configuración de conexión, las migraciones y las restricciones de integridad deberán ser compatibles con MySQL 8.4.
 
-La versión específica del motor se establecerá durante la configuración de infraestructura y quedará documentada en la decisión técnica correspondiente.
+Las conexiones de la aplicación utilizarán UTC y la codificación de caracteres utf8mb4.
 
 ## 7. Estrategia de desarrollo del backend
 

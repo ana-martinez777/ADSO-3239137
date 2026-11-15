@@ -8,7 +8,7 @@
 | Dominio | sports-gear |
 | Backend | PHP con Laravel |
 | Frontend | React |
-| Persistencia | MySQL |
+| Persistencia | MySQL 8.4 con InnoDB |
 | Infraestructura | Docker Compose |
 | Estilo arquitectónico | Arquitectura hexagonal |
 | Organización | Separación por responsabilidades y dependencias dirigidas hacia el dominio |
@@ -127,6 +127,8 @@ Representa un implemento deportivo registrado en el catálogo.
 Responsabilidades:
 
 - Identificarse mediante su referencia.
+- Mantener su referencia actual y permitir cambios únicamente cuando la nueva referencia no haya sido utilizada anteriormente.
+- Conservar la relación con todas las referencias históricas que le hayan sido asignadas.
 - Pertenecer a una categoría.
 - Mantener el total de unidades.
 - Mantener las unidades disponibles.
@@ -211,6 +213,22 @@ Responsabilidades:
 
 La información histórica no debe modificarse cuando cambie el catálogo.
 
+### 5.7. EquipmentReferenceHistory
+
+Representa el historial permanente de referencias asignadas a los implementos deportivos.
+
+Responsabilidades:
+
+- Conservar todas las referencias utilizadas.
+- Relacionar cada referencia histórica con su implemento.
+- Impedir que una referencia utilizada vuelva a asignarse.
+- Mantener los registros históricos inmutables.
+- Garantizar que la referencia actual de cada implemento esté registrada en el historial.
+
+La persistencia debe garantizar la unicidad mediante la clave primaria de reference y la relación con Equipment mediante una clave foránea.
+
+Las operaciones de creación y cambio de referencias deben ejecutarse transaccionalmente.
+
 ## 6. Puertos de aplicación
 
 La aplicación definirá contratos para las operaciones que necesiten comunicarse con elementos externos.
@@ -222,6 +240,7 @@ Se contemplan las siguientes responsabilidades:
 | Puerto | Responsabilidad |
 |---|---|
 | EquipmentRepository | Consultar y persistir implementos deportivos. |
+| EquipmentReferenceRepository | Consultar y registrar referencias históricas, garantizando que ninguna referencia utilizada pueda asignarse nuevamente. |
 | AthleteRepository | Consultar y persistir deportistas. |
 | UserRepository | Consultar y persistir usuarios. |
 | LoanRepository | Consultar y persistir préstamos y sus detalles. |
@@ -253,9 +272,10 @@ Se contemplan:
 
 ### 7.3. Administración de implementos
 
-- Registrar implementos.
+- Registrar implementos y reservar sus referencias.
 - Consultar implementos.
 - Actualizar información.
+- Validar y registrar nuevas referencias históricas cuando cambie la referencia actual.
 - Dar de baja implementos.
 - Consultar disponibilidad.
 
@@ -269,7 +289,7 @@ Se contemplan:
 
 - Registrar préstamos.
 - Verificar la disponibilidad.
-- Verificar el límite de implementos pendientes.
+- Verificar el límite de tres unidades pendientes por deportista.
 - Verificar la existencia de préstamos vencidos.
 - Actualizar las unidades disponibles.
 - Conservar la información histórica.
@@ -299,7 +319,7 @@ Flujo general:
 3. El caso de uso recibe los datos necesarios.
 4. Se consulta el deportista.
 5. Se verifica que el deportista no tenga préstamos vencidos pendientes.
-6. Se verifica que no supere el máximo de tres implementos pendientes.
+6. Se verifica que la suma de las unidades pendientes actuales del deportista y las unidades solicitadas en el nuevo préstamo no supere el máximo de tres unidades.
 7. Se consultan los implementos solicitados.
 8. Se verifica que estén activos y tengan unidades disponibles.
 9. El dominio aplica las operaciones correspondientes sobre los implementos.
@@ -344,7 +364,7 @@ Resultado esperado:
 - Las unidades disponibles no pueden quedar por debajo de cero.
 - No deben generarse préstamos parciales.
 
-La estrategia concreta de concurrencia deberá definirse mediante una decisión técnica ADR y corresponder con las capacidades del motor de base de datos seleccionado.
+La concurrencia se controla mediante transacciones y bloqueos de filas con SELECT ... FOR UPDATE, utilizando las capacidades de MySQL e InnoDB. Las operaciones de préstamo y devolución bloquean los registros involucrados antes de validar y modificar las unidades disponibles, evitando que dos operaciones concurrentes asignen la misma unidad.
 
 La implementación deberá garantizar la consistencia tanto desde la lógica de aplicación como desde la persistencia.
 
@@ -362,7 +382,7 @@ Se deberán contemplar, entre otros:
 - Datos inválidos.
 - Implemento sin unidades disponibles.
 - Deportista con préstamos vencidos.
-- Límite de implementos pendientes superado.
+- Límite de tres unidades pendientes por deportista superado.
 - Devolución duplicada.
 - Conflicto de concurrencia.
 
