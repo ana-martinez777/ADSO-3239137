@@ -12,6 +12,9 @@ class User extends Authenticatable
 {
     use HasFactory, HasVersion4Uuids, Notifiable;
 
+    // Indica que la tabla no utiliza created_at ni updated_at.
+    public $timestamps = false;
+
     protected $authPasswordName = 'password_hash'; // indica a Laravel dónde consultar la contraseña
 
     protected $fillable = [ // permite asignar los tres atributos definidos en el modelo.
