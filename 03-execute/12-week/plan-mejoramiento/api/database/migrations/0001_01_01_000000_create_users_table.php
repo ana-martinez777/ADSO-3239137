@@ -2,48 +2,44 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Crea la tabla de usuarios de Sports Gear.
      */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+
+            // Identificador UUID v4 almacenado como cadena de 36 caracteres.
+            $table->char('id', 36)->primary();
+
+            // Nombre de usuario único utilizado para iniciar sesión.
+            $table->string('username', 120)->unique();
+
+            // Contraseña almacenada mediante un hash Argon2id.
+            $table->string('password_hash', 255);
+
+            // Rol del usuario: administrador o entrenador.
+            $table->string('role', 20);
         });
 
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
-        });
+        // Restringe los roles a los valores permitidos mediante una condición CHECK.
+        DB::statement("
+            ALTER TABLE users
+            ADD CONSTRAINT chk_users_role
+            CHECK (role IN ('admin', 'coach'))
+        ");
     }
 
     /**
-     * Reverse the migrations.
+     * Elimina la tabla de usuarios al revertir esta migración.
      */
     public function down(): void
     {
         Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
     }
 };
