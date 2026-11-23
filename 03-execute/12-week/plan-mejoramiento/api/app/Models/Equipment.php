@@ -11,12 +11,13 @@ class Equipment extends Model
 {
     use HasVersion4Uuids;
 
-
-    // Define los atributos que pueden asignarse masivamente.
+    // Permite asignar los atributos del implemento.
     protected $fillable = [
         'reference',
         'category_id',
         'total_units',
+        'available_units',
+        'deleted_at',
     ];
 
     // Indica que la tabla no utiliza created_at ni updated_at.

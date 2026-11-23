@@ -14,6 +14,8 @@ class Loan extends Model
     // Define los campos que pueden asignarse masivamente.
     protected $fillable = [
         'athlete_id',
+        'user_id',
+        'loaned_at',
     ];
 
     // La tabla no utiliza created_at ni updated_at.

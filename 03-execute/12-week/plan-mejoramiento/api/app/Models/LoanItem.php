@@ -12,8 +12,13 @@ class LoanItem extends Model
 
     // Define los campos que pueden asignarse masivamente.
     protected $fillable = [
+        'loan_id',
         'equipment_id',
+        'equipment_reference',
+        'category_name',
         'quantity',
+        'due_at',
+        'returned_at',
     ];
 
     // La tabla no utiliza created_at ni updated_at.
