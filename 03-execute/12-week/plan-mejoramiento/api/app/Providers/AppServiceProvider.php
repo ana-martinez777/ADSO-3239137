@@ -4,8 +4,10 @@ namespace App\Providers;
 use App\Application\Ports\PasswordHasher;
 use App\Application\Ports\TokenIssuer;
 use App\Application\Ports\UserRepository;
+use App\Application\Ports\SportsGearRepository;
 use App\Infrastructure\Persistence\EloquentUserRepository;
 use App\Infrastructure\Security\LaravelPasswordHasher;
+use App\Infrastructure\Persistence\EloquentSportsGearRepository;
 use App\Models\User;
 use App\Services\Auth\JwtService;
 use Illuminate\Http\Request;
@@ -20,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Conecta los contratos de aplicación con los adaptadores de Laravel.
         $this->app->bind(UserRepository::class, EloquentUserRepository::class);
+        $this->app->bind(SportsGearRepository::class, EloquentSportsGearRepository::class);
         $this->app->bind(PasswordHasher::class, LaravelPasswordHasher::class);
         $this->app->bind(TokenIssuer::class, JwtService::class);
     }
