@@ -4,1133 +4,1104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Título que aparece en la pestaña del navegador. -->
-    <title>Sports Gear | Gestión de implementos deportivos</title>
-
-    <!-- Descripción del contenido de la página. -->
+    <!-- Title shown in the browser tab. -->
+    <title>Sports Gear | Préstamo de implementos deportivos</title>
+    <!-- Page description for search engines. -->
     <meta name="description"
-        content="Sports Gear: sistema de gestión de implementos deportivos, deportistas, préstamos y devoluciones de un coliseo.">
+        content="Sports Gear controla el catálogo de implementos de un coliseo y los préstamos y devoluciones a deportistas.">
+    <!-- Color some browsers use for the device interface. -->
+    <meta name="theme-color" content="#14213D">
 
-    <!-- Color que algunos navegadores utilizan en la interfaz del dispositivo. -->
-    <meta name="theme-color" content="#102A43">
-
-    <!-- Conexión anticipada a Google Fonts para cargar las tipografías. -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!-- Carga las fuentes Inter y Manrope desde Google Fonts. -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
-
-    <!--
-        Aquí se definen los estilos visuales de toda la página:
-        colores, tamaños, espacios, tarjetas, navegación y adaptación móvil.
-    -->
     <style>
-        /*
-            :root permite declarar variables CSS que pueden reutilizarse
-            en cualquier parte del documento.
-        */
+        /* Design tokens. */
         :root {
-            --primary: #102A43;
-            --primary-light: #176B87;
-            --accent: #C5F135;
-            --background: #F3F6F8;
-            --surface: #FFFFFF;
-            --text: #172B3A;
-            --muted: #607383;
-            --border: #E1E8ED;
-            --radius: 16px;
+            --ink: #14213d;
+            --ink-soft: #4a5873;
+            --court: #1f5fad;
+            --court-deep: #17497f;
+            --court-line: rgba(255, 255, 255, 0.22);
+            --paper: #f4f6f8;
+            --surface: #ffffff;
+            --rule: #dde3ea;
+            --available: #1e8f62;
+            --signal: #e8590c;
+            --radius-lg: 14px;
+            --radius-sm: 6px;
             --container: 1120px;
+            --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
 
-        /*
-            box-sizing: border-box facilita calcular el tamaño de los elementos.
-            margin: 0 elimina los márgenes predeterminados.
-            padding: 0 elimina los rellenos predeterminados.
-        */
-        * {
+        /* Reset. */
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
-        /*
-            scroll-behavior permite que el desplazamiento entre secciones
-            sea suave cuando el usuario selecciona un enlace de navegación.
+        * {
+            margin: 0;
+        }
 
-            scroll-padding-top evita que el encabezado fijo tape el contenido.
-        */
+        /* Smooth scrolling; scroll-padding-top keeps the sticky header off the section titles. */
         html {
             scroll-behavior: smooth;
-            scroll-padding-top: 90px;
+            scroll-padding-top: 88px;
         }
 
-        /*
-            body representa el contenido visible de la página.
-
-            Se establece la fuente general, el color de fondo,
-            el color del texto y la separación entre líneas.
-        */
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--background);
-            color: var(--text);
+            font-family: var(--font);
+            font-size: 1.0625rem;
             line-height: 1.6;
+            color: var(--ink);
+            background: var(--paper);
+            -webkit-font-smoothing: antialiased;
         }
 
-        /*
-            Los elementos h1, h2 y h3 utilizan Manrope
-            para diferenciar visualmente los encabezados.
-        */
-        h1,
-        h2,
-        h3 {
-            font-family: 'Manrope', sans-serif;
-            line-height: 1.2;
-        }
-
-        /*
-            inherit hace que los enlaces utilicen el color
-            del elemento que los contiene.
-
-            text-decoration elimina el subrayado predeterminado.
-        */
         a {
             color: inherit;
-            text-decoration: none;
         }
 
-        /*
-            .container centra el contenido y limita su ancho máximo.
+        /* Visible keyboard focus everywhere. */
+        :focus-visible {
+            outline: 3px solid var(--signal);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
 
-            width: min() permite utilizar el ancho disponible
-            sin superar el tamaño máximo definido en --container.
-
-            margin: 0 auto centra horizontalmente el contenedor.
-        */
         .container {
             width: min(100% - 40px, var(--container));
-            margin: 0 auto;
+            margin-inline: auto;
         }
 
-        /*
-            .header representa la barra superior de navegación.
+        /* Skip link for keyboard users. */
+        .skip-link {
+            position: absolute;
+            left: 16px;
+            top: -60px;
+            background: var(--ink);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            z-index: 100;
+        }
 
-            position: sticky mantiene el encabezado visible
-            cuando el usuario se desplaza por la página.
+        .skip-link:focus {
+            top: 12px;
+        }
 
-            z-index controla su posición respecto a otros elementos.
-        */
-        .header {
+        /* Sticky top bar. */
+        .site-header {
             position: sticky;
             top: 0;
-            z-index: 10;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
+            z-index: 20;
+            background: rgba(244, 246, 248, 0.94);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--rule);
         }
 
-        /*
-            .header-content organiza el logotipo y los enlaces.
-
-            display: flex permite distribuirlos horizontalmente.
-            align-items centra los elementos verticalmente.
-            justify-content: space-between separa ambos extremos.
-        */
-        .header-content {
-            min-height: 76px;
+        .site-header .container {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 24px;
+            min-height: 68px;
         }
 
-        /* Contenedor del nombre y símbolo de Sports Gear. */
         .brand {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 11px;
-            color: var(--primary);
-            font-family: 'Manrope', sans-serif;
-            font-size: 1.2rem;
+            gap: 10px;
             font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.01em;
+            text-decoration: none;
+            white-space: nowrap;
         }
 
-        /* Cuadro que contiene las iniciales SG. */
+        /* Logo: a court center circle. */
         .brand-mark {
-            width: 38px;
-            height: 38px;
-            display: grid;
-            place-items: center;
-            background: var(--primary);
-            color: var(--accent);
-            border-radius: 11px;
-            font-size: 1.2rem;
-            font-weight: 800;
+            width: 30px;
+            height: 30px;
+            flex: none;
         }
 
-        /* Distribución horizontal de los enlaces de navegación. */
-        .navigation {
+        .main-nav {
             display: flex;
-            align-items: center;
-            gap: 30px;
+            gap: 28px;
         }
 
-        /* Apariencia de cada enlace de navegación. */
-        .navigation a {
-            color: var(--muted);
-            font-size: 0.9rem;
+        .main-nav a {
+            text-decoration: none;
+            font-size: 0.95rem;
             font-weight: 600;
-            transition: color 0.2s ease;
+            color: var(--ink-soft);
         }
 
-        /* Cambia el color del enlace cuando el usuario pasa el cursor. */
-        .navigation a:hover {
-            color: var(--primary-light);
+        .main-nav a:hover {
+            color: var(--court);
         }
 
-        /*
-            .hero es la sección principal de la página.
-
-            Contiene el mensaje de presentación del producto.
-        */
+        /* HERO: court-floor background with the availability board. */
         .hero {
             position: relative;
             overflow: hidden;
-            padding: 100px 0 105px;
-            background: var(--primary);
-            color: white;
+            background: var(--court);
+            color: #fff;
         }
 
-        /*
-            ::after crea un elemento decorativo sin agregar HTML adicional.
-
-            Círculo verde semitransparente
-        */
-        .hero::after {
-            content: "";
+        /* Court markings drawn with an inline SVG. */
+        .court-lines {
             position: absolute;
-            width: 390px;
-            height: 390px;
-            right: -100px;
-            top: -130px;
-            border: 65px solid rgba(197, 241, 53, 0.10);
-            border-radius: 50%;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
 
-        /*
-            Contenedor del texto principal.
-
-            z-index: 1 permite que el contenido permanezca
-            delante del elemento decorativo.
-        */
-        .hero-content {
+        .hero .container {
             position: relative;
-            z-index: 1;
-            max-width: 720px;
-        }
-
-        /* Etiqueta pequeña que aparece antes del título principal. */
-        .eyebrow {
-            display: inline-flex;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+            gap: 56px;
             align-items: center;
-            gap: 9px;
-            padding: 8px 14px;
-            margin-bottom: 25px;
-            background: rgba(197, 241, 53, 0.12);
-            color: var(--accent);
-            border: 1px solid rgba(197, 241, 53, 0.25);
-            border-radius: 30px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
+            padding-block: 88px 96px;
         }
 
-        /*
-            Título principal
-        */
         .hero h1 {
-            max-width: 700px;
-            margin-bottom: 22px;
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-size: clamp(2.3rem, 4.6vw, 3.6rem);
+            line-height: 1.05;
             font-weight: 800;
-            letter-spacing: -0.045em;
+            letter-spacing: -0.03em;
+            max-width: 13ch;
         }
 
-        /* Destaca una parte del título utilizando el color de acento. */
-        .hero h1 span {
-            color: var(--accent);
+        .hero-lead {
+            margin-top: 22px;
+            font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.86);
+            max-width: 46ch;
         }
 
-        /* Texto descriptivo de la sección principal. */
-        .hero-description {
-            max-width: 590px;
-            color: #C7D5DF;
-            font-size: 1.1rem;
-            line-height: 1.8;
-        }
-
-        /*
-            Enlace destacado que lleva al usuario
-            hacia la sección de funcionalidades.
-        */
-        .hero-label {
-            display: inline-block;
-            margin-top: 32px;
-            padding: 11px 18px;
-            background: var(--accent);
-            color: var(--primary);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
-
-        /*
-            .section establece el espacio vertical
-            que separa una sección de otra.
-        */
-        .section {
-            padding: 85px 0;
-        }
-
-        /* Limita el ancho del encabezado de cada sección. */
-        .section-heading {
-            max-width: 650px;
-            margin-bottom: 38px;
-        }
-
-        /* Etiqueta pequeña que identifica el tema de cada sección. */
-        .section-label {
-            display: block;
-            margin-bottom: 12px;
-            color: var(--primary-light);
-            font-size: 0.78rem;
-            font-weight: 800;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-
-        /* Estilos de los títulos de segundo nivel. */
-        .section-heading h2 {
-            margin-bottom: 14px;
-            color: var(--primary);
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            font-weight: 800;
-            letter-spacing: -0.035em;
-        }
-
-        /* Estilos de los textos descriptivos de las secciones. */
-        .section-heading p {
-            color: var(--muted);
-            font-size: 1rem;
-        }
-
-        /*
-            .features-grid organiza las tarjetas en tres columnas.
-
-            repeat(3, 1fr) significa que se crean tres columnas
-            con el mismo espacio disponible.
-        */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        /* Apariencia general de cada tarjeta de funcionalidad. */
-        .feature-card {
-            padding: 28px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-
-        /*
-            Efecto visual al pasar el cursor sobre una tarjeta.
-
-            transform mueve ligeramente la tarjeta hacia arriba.
-            box-shadow agrega una sombra.
-        */
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(16, 42, 67, 0.09);
-        }
-
-        /* Cuadro que contiene el símbolo de cada funcionalidad. */
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            display: grid;
-            place-items: center;
-            margin-bottom: 20px;
-            background: #EFF7D9;
-            color: var(--primary);
-            border-radius: 13px;
-            font-size: 1.35rem;
-            font-weight: 800;
-        }
-
-        /* Título de cada tarjeta. */
-        .feature-card h3 {
-            margin-bottom: 10px;
-            color: var(--primary);
-            font-size: 1.08rem;
-        }
-
-        /* Descripción de cada funcionalidad. */
-        .feature-card p {
-            color: var(--muted);
-            font-size: 0.91rem;
-        }
-
-        /* Cambia el fondo de la sección de categorías. */
-        .categories {
-            background: var(--surface);
-        }
-
-        /*
-            Distribuye las cinco categorías en cinco columnas
-            cuando existe suficiente espacio horizontal.
-        */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 14px;
-        }
-
-        /* Apariencia de cada tarjeta de categoría. */
-        .category-card {
-            padding: 24px 16px;
-            background: var(--background);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            text-align: center;
-            transition: border-color 0.2s ease, transform 0.2s ease;
-        }
-
-        /* Efecto visual al pasar el cursor por una categoría. */
-        .category-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary-light);
-        }
-
-        /* Símbolo que identifica visualmente cada categoría. */
-        .category-icon {
-            display: block;
-            margin-bottom: 12px;
-            color: var(--primary-light);
-            font-size: 1.8rem;
-        }
-
-        /* Nombre de la categoría. */
-        .category-card h3 {
-            color: var(--primary);
-            font-size: 0.95rem;
-        }
-
-        /* Organiza los dos perfiles en columnas. */
-        .roles-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 22px;
-        }
-
-        /* Apariencia de las tarjetas de responsabilidades. */
-        .role-card {
-            padding: 32px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-        }
-
-        /* Título del perfil. */
-        .role-card h3 {
-            margin-bottom: 15px;
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-
-        /* Descripción del perfil. */
-        .role-card p {
-            margin-bottom: 15px;
-            color: var(--muted);
-            font-size: 0.92rem;
-        }
-
-        /* Lista de responsabilidades del perfil. */
-        .role-card ul {
-            padding-left: 20px;
-            color: var(--muted);
-        }
-
-        /* Espacio entre las responsabilidades. */
-        .role-card li {
-            margin-bottom: 8px;
-            padding-left: 5px;
-        }
-
-        /* Color de los marcadores de la lista. */
-        .role-card li::marker {
-            color: var(--primary-light);
-        }
-
-        /* Fondo azul para destacar las reglas. */
-        .rules {
-            background: var(--primary);
-        }
-
-        /* Color de la etiqueta de esta sección. */
-        .rules .section-label {
-            color: var(--accent);
-        }
-
-        /* Color del título sobre el fondo azul. */
-        .rules .section-heading h2 {
-            color: white;
-        }
-
-        /* Color del texto descriptivo sobre el fondo azul. */
-        .rules .section-heading p {
-            color: #C7D5DF;
-        }
-
-        /*
-            La lista de reglas se distribuye en dos columnas.
-        */
-        .rules-list {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-            list-style: none;
-            counter-reset: rule;
-        }
-
-        /* Apariencia de cada regla de negocio. */
-        .rules-list li {
-            position: relative;
-            min-height: 95px;
-            padding: 23px 22px 23px 65px;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 13px;
-            color: #E4EDF2;
-            font-size: 0.92rem;
-            counter-increment: rule;
-        }
-
-        /*
-            ::before crea la numeración de cada regla.
-
-            counter(rule, decimal-leading-zero) muestra
-            los números con dos dígitos: 01, 02, 03...
-        */
-        .rules-list li::before {
-            content: counter(rule, decimal-leading-zero);
-            position: absolute;
-            left: 20px;
-            top: 22px;
-            color: var(--accent);
-            font-family: 'Manrope', sans-serif;
-            font-size: 1rem;
-            font-weight: 800;
-        }
-
-        /*
-            .technology-list utiliza flexbox para distribuir
-            las tecnologías en varias filas cuando sea necesario.
-        */
-        .technology-list {
+        .hero-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
+            margin-top: 34px;
         }
 
-        /* Apariencia de cada etiqueta tecnológica. */
-        .technology-item {
-            padding: 12px 19px;
+        .button {
+            display: inline-flex;
+            align-items: center;
+            min-height: 48px;
+            padding: 0 22px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+        }
+
+        .button-primary {
+            background: #fff;
+            color: var(--court-deep);
+        }
+
+        .button-primary:hover {
+            background: #e9f0fa;
+        }
+
+        .button-secondary {
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.55);
+        }
+
+        .button-secondary:hover {
+            border-color: #fff;
+        }
+
+        /* Availability board: the signature element of the page. */
+        .board {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 9px;
-            color: var(--primary);
-            font-size: 0.9rem;
-            font-weight: 600;
+            color: var(--ink);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 30px 60px -20px rgba(8, 25, 52, 0.55);
+            overflow: hidden;
         }
 
-
-        /* Fondo y espaciado del pie de página. */
-        .footer {
-            padding: 28px 0;
-            background: #0B1F30;
-            color: #B7C8D4;
-        }
-
-        /* Distribuye la información del pie de página. */
-        .footer-content {
+        .board-head {
             display: flex;
             justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .board-head h2 {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .board-head p {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+        }
+
+        .board-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .board-row {
+            display: grid;
+            grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+            gap: 14px;
             align-items: center;
-            gap: 20px;
+            padding: 14px 22px;
+            border-bottom: 1px solid var(--rule);
         }
 
-        /* Destaca el nombre del producto. */
-        .footer strong {
-            color: white;
-            font-family: 'Manrope', sans-serif;
+        .board-ref {
+            white-space: nowrap;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.01em;
         }
 
-        /* Tamaño de los textos del pie de página. */
-        .footer p {
-            font-size: 0.83rem;
+        .board-category {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
         }
 
-        /*
-            RESPONSIVE PARA TABLETAS
+        /* Units bar: filled part = available units. */
+        .units-bar {
+            height: 6px;
+            margin-top: 6px;
+            border-radius: 99px;
+            background: #e6ebf1;
+            overflow: hidden;
+        }
 
-            @media permite aplicar estilos dependiendo
-            del ancho de la pantalla.
+        .units-bar span {
+            display: block;
+            height: 100%;
+            width: var(--fill);
+            background: var(--available);
+            border-radius: inherit;
+            animation: fill-bar 900ms cubic-bezier(.2, .7, .2, 1) both;
+        }
 
-            Cuando el ancho es de 850 píxeles o menos,
-            las tarjetas se reorganizan en menos columnas.
-        */
-        @media (max-width: 850px) {
-            .features-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .board-count {
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+            font-size: 0.9rem;
+            color: var(--ink-soft);
+            white-space: nowrap;
+        }
 
-            .category-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .board-count strong {
+            font-size: 1.35rem;
+            color: var(--ink);
+        }
 
-            .hero {
-                padding: 80px 0;
+        .units-bar.is-empty span {
+            background: transparent;
+        }
+
+        /* Overdue loan line at the bottom of the board. */
+        .board-alert {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 22px;
+            background: #fff4ed;
+            font-size: 0.92rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--signal);
+            flex: none;
+        }
+
+        .board-alert strong {
+            color: #b3430a;
+        }
+
+        @keyframes fill-bar {
+            from {
+                width: 0;
             }
         }
 
-        /*
-            RESPONSIVE PARA TELÉFONOS
+        /* Generic section spacing. */
+        .band {
+            padding-block: 96px;
+        }
 
-            Cuando el ancho es de 600 píxeles o menos,
-            las tarjetas principales se muestran en una sola columna.
-        */
-        @media (max-width: 600px) {
-            .header-content {
-                min-height: 68px;
+        .band-white {
+            background: var(--surface);
+        }
+
+        .band-heading {
+            max-width: 640px;
+            margin-bottom: 48px;
+        }
+
+        .band-heading h2 {
+            font-size: clamp(1.8rem, 3vw, 2.4rem);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            font-weight: 800;
+        }
+
+        .band-heading p {
+            margin-top: 14px;
+            color: var(--ink-soft);
+            font-size: 1.1rem;
+        }
+
+        /* HOW IT WORKS: a real three-step sequence. */
+        .steps {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0;
+            counter-reset: step;
+            border-top: 3px solid var(--ink);
+        }
+
+        .steps li {
+            counter-increment: step;
+            padding: 26px 28px 0 0;
+        }
+
+        .steps li+li {
+            padding-left: 28px;
+            border-left: 1px solid var(--rule);
+        }
+
+        .steps li::before {
+            content: counter(step);
+            display: block;
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--court);
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 18px;
+        }
+
+        .steps h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .steps p {
+            color: var(--ink-soft);
+        }
+
+        /* FEATURES: two-column list with icons. */
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 36px 56px;
+        }
+
+        .feature {
+            display: grid;
+            grid-template-columns: 44px minmax(0, 1fr);
+            gap: 18px;
+        }
+
+        .feature svg {
+            width: 44px;
+            height: 44px;
+            padding: 10px;
+            border-radius: 10px;
+            background: #e7eef8;
+            color: var(--court);
+        }
+
+        .feature h3 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .feature p {
+            color: var(--ink-soft);
+        }
+
+        /* CATEGORIES: the five seeded categories. */
+        .category-strip {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            border: 1px solid var(--rule);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        .category-strip li {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 28px 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .category-strip li+li {
+            border-left: 1px solid var(--rule);
+        }
+
+        .category-strip svg {
+            width: 40px;
+            height: 40px;
+            color: var(--court);
+        }
+
+        /* RULES: what the system enforces. */
+        .rule-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0 56px;
+        }
+
+        .rule-list li {
+            padding: 22px 0;
+            border-top: 1px solid var(--rule);
+        }
+
+        .rule-list h3 {
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+        }
+
+        .rule-list p {
+            color: var(--ink-soft);
+        }
+
+        /* ROLES: permission matrix based on the API contract. */
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--rule);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+        }
+
+        .roles-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 520px;
+        }
+
+        .roles-table th,
+        .roles-table td {
+            padding: 14px 22px;
+            border-bottom: 1px solid var(--rule);
+            text-align: left;
+        }
+
+        .roles-table thead th {
+            font-size: 1rem;
+            background: #f8fafc;
+        }
+
+        .roles-table tbody tr:last-child th,
+        .roles-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .roles-table tbody th {
+            font-weight: 500;
+        }
+
+        .roles-table td {
+            width: 170px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .yes {
+            color: var(--available);
+        }
+
+        .no {
+            color: #8a96a8;
+            font-weight: 500;
+        }
+
+        /* QUALITY: compact attribute list. */
+        .quality-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 28px;
+        }
+
+        .quality-list h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+            padding-top: 14px;
+            border-top: 3px solid var(--court);
+        }
+
+        .quality-list p {
+            font-size: 0.95rem;
+            color: var(--ink-soft);
+        }
+
+        .stack {
+            margin-top: 64px;
+            padding-top: 28px;
+            border-top: 1px solid var(--rule);
+            color: var(--ink-soft);
+        }
+
+        .stack strong {
+            color: var(--ink);
+        }
+
+        /* Footer. */
+        .site-footer {
+            background: var(--ink);
+            color: rgba(255, 255, 255, 0.78);
+            padding-block: 36px;
+            font-size: 0.95rem;
+        }
+
+        .site-footer .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .site-footer strong {
+            color: #fff;
+        }
+
+        /* Tablets. */
+        @media (max-width: 960px) {
+            .hero .container {
+                grid-template-columns: 1fr;
+                gap: 48px;
+                padding-block: 64px 72px;
             }
 
-            .navigation {
-                gap: 12px;
+            .quality-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .navigation a {
-                font-size: 0.75rem;
+            .category-strip {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
 
-            .brand {
-                font-size: 1rem;
+            .category-strip li:nth-child(4) {
+                border-left: 0;
             }
 
-            .brand-mark {
-                width: 32px;
-                height: 32px;
+            .category-strip li:nth-child(n+4) {
+                border-top: 1px solid var(--rule);
+            }
+        }
+
+        /* Phones. */
+        @media (max-width: 680px) {
+            html {
+                scroll-padding-top: 120px;
             }
 
-            .hero {
-                padding: 70px 0;
+            .site-header .container {
+                flex-wrap: wrap;
+                row-gap: 6px;
+                padding-block: 12px;
             }
 
-            .hero-description {
-                font-size: 0.98rem;
+            .main-nav {
+                width: 100%;
+                justify-content: space-between;
+                gap: 10px;
             }
 
-            .section {
-                padding: 65px 0;
+            .main-nav a {
+                font-size: 0.88rem;
             }
 
-            .features-grid,
-            .roles-grid,
-            .rules-list {
+            .band {
+                padding-block: 64px;
+            }
+
+            .steps,
+            .feature-list,
+            .rule-list,
+            .quality-list {
                 grid-template-columns: 1fr;
             }
 
-            .category-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .steps li,
+            .steps li+li {
+                padding: 22px 0;
+                border-left: 0;
             }
 
-            .feature-card,
-            .role-card {
-                padding: 23px;
+            .steps li+li {
+                border-top: 1px solid var(--rule);
             }
 
-            .footer-content {
-                flex-direction: column;
-                align-items: flex-start;
+            .category-strip {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .category-strip li:nth-child(n) {
+                border-left: 0;
+                border-top: 1px solid var(--rule);
+            }
+
+            .category-strip li:nth-child(-n+2) {
+                border-top: 0;
+            }
+
+            .category-strip li:nth-child(even) {
+                border-left: 1px solid var(--rule);
+            }
+
+            .board-row {
+                grid-template-columns: 5.4rem minmax(0, 1fr) auto;
+                padding-inline: 16px;
+                gap: 10px;
             }
         }
 
-        /*
-            RESPONSIVE PARA PANTALLAS MUY ESTRECHAS
-
-            Estos ajustes se aplican cuando el ancho
-            de la pantalla es de 380 píxeles o menos.
-        */
-        @media (max-width: 380px) {
-            .navigation {
-                gap: 8px;
+        /* Respect the user's reduced-motion preference. */
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
             }
 
-            .navigation a {
-                font-size: 0.68rem;
-            }
-
-            .container {
-                width: min(100% - 28px, var(--container));
+            .units-bar span {
+                animation: none;
             }
         }
     </style>
 </head>
 
 <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
 
-    <!--
-        <header> representa la cabecera de la página.
-        Contiene el nombre del producto y la navegación principal.
-    -->
-    <header class="header">
-        <div class="container header-content">
-
-            <!-- Enlace al inicio de la página. -->
-            <a href="#inicio" class="brand">
-                <span class="brand-mark">SG</span>
-                SPORTS GEAR
+    <!-- Page header with the product name and the main navigation. -->
+    <header class="site-header">
+        <div class="container">
+            <a href="#top" class="brand" aria-label="Sports Gear, ir al inicio">
+                <svg class="brand-mark" viewBox="0 0 30 30" aria-hidden="true">
+                    <rect width="30" height="30" rx="7" fill="#1F5FAD" />
+                    <line x1="15" y1="3" x2="15" y2="27" stroke="#fff" stroke-width="2" />
+                    <circle cx="15" cy="15" r="6" fill="none" stroke="#fff" stroke-width="2" />
+                </svg>
+                Sports Gear
             </a>
-
-            <!--
-                <nav> agrupa los enlaces de navegación.
-
-                Cada href apunta al id de una sección.
-                Por ejemplo, #funciones lleva a la sección con id="funciones".
-            -->
-            <nav class="navigation" aria-label="Navegación principal">
-                <a href="#funciones">Funciones</a>
-                <a href="#categorias">Categorías</a>
+            <!-- Main navigation; each href points to a section id. -->
+            <nav class="main-nav" aria-label="Navegación principal">
+                <a href="#how-it-works">Cómo funciona</a>
+                <a href="#features">Funciones</a>
+                <a href="#rules">Reglas</a>
                 <a href="#roles">Roles</a>
-                <a href="#reglas">Reglas</a>
             </nav>
-
         </div>
     </header>
 
-    <!--
-        <main> contiene el contenido principal de la página.
-        Dentro se encuentran las diferentes secciones informativas.
-    -->
-    <main>
+    <main id="main-content">
 
-        <!--
-            Presenta el nombre del producto y explica
-            brevemente para qué sirve Sports Gear.
-        -->
-        <section class="hero" id="inicio">
+        <!-- HERO: what Sports Gear is for, next to a sample availability board. -->
+        <section class="hero" id="top" aria-labelledby="hero-title">
+            <svg class="court-lines" viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <g fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="3">
+                    <rect x="40" y="40" width="1120" height="560" />
+                    <line x1="600" y1="40" x2="600" y2="600" />
+                    <circle cx="600" cy="320" r="90" />
+                    <path d="M40 180 h170 v280 h-170" />
+                    <path d="M1160 180 h-170 v280 h170" />
+                    <path d="M40 120 a 260 260 0 0 1 0 400" />
+                    <path d="M1160 120 a 260 260 0 0 0 0 400" />
+                </g>
+            </svg>
+
             <div class="container">
-
-                <div class="hero-content">
-
-                    <span class="eyebrow">
-                        Gestión deportiva inteligente
-                    </span>
-
-                    <h1>
-                        Todo el control de tus
-                        <span>implementos deportivos.</span>
-                    </h1>
-
-                    <p class="hero-description">
-                        Sports Gear permite administrar el catálogo de implementos,
-                        controlar las unidades disponibles y gestionar los préstamos
-                        y devoluciones de los deportistas de un coliseo.
+                <div>
+                    <h1 id="hero-title">Sabes qué hay en el depósito y quién se lo llevó.</h1>
+                    <p class="hero-lead">
+                        Sports Gear lleva el catálogo de implementos del coliseo y registra
+                        cada préstamo y devolución a los deportistas, con la disponibilidad
+                        al día y los vencidos a la vista.
                     </p>
-
-                    <!-- Enlace que lleva a la sección de funcionalidades. -->
-                    <a href="#funciones" class="hero-label">
-                        Conoce el sistema →
-                    </a>
-
+                    <div class="hero-actions">
+                        <a class="button button-primary" href="#how-it-works">Ver cómo funciona</a>
+                        <a class="button button-secondary" href="#rules">Conocer las reglas</a>
+                    </div>
                 </div>
+
+                <!-- Sample board with fictitious data that illustrates the product. -->
+                <figure class="board" aria-label="Ejemplo de disponibilidad del catálogo">
+                    <div class="board-head">
+                        <h2>Disponibilidad del catálogo</h2>
+                        <p>Ejemplo</p>
+                    </div>
+                    <ul class="board-list">
+                        <li class="board-row">
+                            <span class="board-ref">BAL-001</span>
+                            <div>
+                                <span class="board-category">Balones</span>
+                                <div class="units-bar" style="--fill: 67%"><span></span></div>
+                            </div>
+                            <span class="board-count"><strong>4</strong> de 6</span>
+                        </li>
+                        <li class="board-row">
+                            <span class="board-ref">RAQ-002</span>
+                            <div>
+                                <span class="board-category">Raquetas</span>
+                                <div class="units-bar" style="--fill: 25%"><span></span></div>
+                            </div>
+                            <span class="board-count"><strong>1</strong> de 4</span>
+                        </li>
+                        <li class="board-row">
+                            <span class="board-ref">PRO-004</span>
+                            <div>
+                                <span class="board-category">Protección</span>
+                                <div class="units-bar" style="--fill: 100%"><span></span></div>
+                            </div>
+                            <span class="board-count"><strong>8</strong> de 8</span>
+                        </li>
+                        <li class="board-row">
+                            <span class="board-ref">ATL-010</span>
+                            <div>
+                                <span class="board-category">Atletismo</span>
+                                <div class="units-bar is-empty" style="--fill: 0%"><span></span></div>
+                            </div>
+                            <span class="board-count"><strong>0</strong> de 3</span>
+                        </li>
+                    </ul>
+                    <figcaption class="board-alert">
+                        <span class="status-dot" aria-hidden="true"></span>
+                        <span><strong>Vencido:</strong> RAQ-002 debía devolverse hace 1 día.</span>
+                    </figcaption>
+                </figure>
             </div>
         </section>
 
-        <!--
-            Cada <article> representa una tarjeta independiente.
-            Estas tarjetas describen las capacidades del producto
-        -->
-        <section class="section" id="funciones">
+        <!-- HOW IT WORKS: the three steps of a loan. -->
+        <section class="band band-white" id="how-it-works" aria-labelledby="how-title">
             <div class="container">
-
-                <div class="section-heading">
-                    <span class="section-label">Funcionalidades</span>
-
-                    <h2>
-                        Gestión deportiva en un solo lugar
-                    </h2>
-
-                    <p>
-                        Herramientas para organizar los implementos,
-                        controlar los préstamos y consultar la información
-                        de las operaciones.
-                    </p>
+                <div class="band-heading">
+                    <h2 id="how-title">Cómo funciona</h2>
+                    <p>Tres pasos, siempre en el mismo orden.</p>
                 </div>
-
-                <!-- Cuadrícula que contiene las tarjetas de funcionalidades. -->
-                <div class="features-grid">
-
-                    <article class="feature-card">
-                        <div class="feature-icon" aria-hidden="true">▦</div>
-                        <h3>Catálogo de implementos</h3>
-                        <p>
-                            Registro y administración de implementos deportivos,
-                            sus referencias, categorías y unidades disponibles.
-                        </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon" aria-hidden="true">♙</div>
-                        <h3>Deportistas</h3>
-                        <p>
-                            Gestión de los deportistas que solicitan
-                            implementos deportivos.
-                        </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon" aria-hidden="true">↗</div>
-                        <h3>Préstamos</h3>
-                        <p>
-                            Registro y seguimiento de préstamos con un
-                            plazo de devolución de dos días.
-                        </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon" aria-hidden="true">↩</div>
-                        <h3>Devoluciones</h3>
-                        <p>
-                            Registro de devoluciones y actualización
-                            de las unidades disponibles.
-                        </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon" aria-hidden="true">◷</div>
-                        <h3>Préstamos vencidos</h3>
-                        <p>
-                            Consulta de los préstamos que superaron
-                            su fecha límite de devolución.
-                        </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon" aria-hidden="true">▥</div>
-                        <h3>Más solicitados</h3>
-                        <p>
-                            Reporte de los implementos deportivos
-                            que registran mayor cantidad de solicitudes.
-                        </p>
-                    </article>
-
-                </div>
-            </div>
-        </section>
-
-        <!--
-            Presenta las cinco categorías fijas del catálogo.
-        -->
-        <section class="section categories" id="categorias">
-            <div class="container">
-
-                <div class="section-heading">
-                    <span class="section-label">Organización</span>
-
-                    <h2>
-                        Categorías deportivas
-                    </h2>
-
-                    <p>
-                        El catálogo organiza los implementos
-                        en cinco categorías principales.
-                    </p>
-                </div>
-
-                <!-- Cuadrícula con las cinco categorías definidas para el proyecto. -->
-                <div class="category-grid">
-
-                    <article class="category-card">
-                        <span class="category-icon" aria-hidden="true">◉</span>
-                        <h3>Balones</h3>
-                    </article>
-
-                    <article class="category-card">
-                        <span class="category-icon" aria-hidden="true">⌁</span>
-                        <h3>Raquetas</h3>
-                    </article>
-
-                    <article class="category-card">
-                        <span class="category-icon" aria-hidden="true">⬡</span>
-                        <h3>Protección</h3>
-                    </article>
-
-                    <article class="category-card">
-                        <span class="category-icon" aria-hidden="true">↗</span>
-                        <h3>Atletismo</h3>
-                    </article>
-
-                    <article class="category-card">
-                        <span class="category-icon" aria-hidden="true">▣</span>
-                        <h3>Gimnasio</h3>
-                    </article>
-
-                </div>
-            </div>
-        </section>
-
-        <!--
-            ROLES Y RESPONSABILIDADES
-        -->
-        <section class="section" id="roles">
-            <div class="container">
-
-                <div class="section-heading">
-                    <span class="section-label">Usuarios del sistema</span>
-
-                    <h2>
-                        Roles y responsabilidades
-                    </h2>
-
-                    <p>
-                        El sistema contempla perfiles con responsabilidades
-                        diferenciadas para la administración y operación.
-                    </p>
-                </div>
-
-                <div class="roles-grid">
-
-                    <!-- Responsabilidades del administrador. -->
-                    <article class="role-card">
-                        <h3>Administrador</h3>
-
-                        <p>
-                            Responsable de la administración del sistema.
-                        </p>
-
-                        <ul>
-                            <li>Gestiona el catálogo de implementos.</li>
-                            <li>Registra y consulta deportistas.</li>
-                            <li>Gestiona los entrenadores.</li>
-                            <li>Consulta el reporte de implementos más solicitados.</li>
-                        </ul>
-                    </article>
-
-                    <!-- Responsabilidades del entrenador. -->
-                    <article class="role-card">
-                        <h3>Entrenador</h3>
-
-                        <p>
-                            Responsable de las operaciones de préstamo.
-                        </p>
-
-                        <ul>
-                            <li>Registra y consulta deportistas.</li>
-                            <li>Registra préstamos y devoluciones.</li>
-                            <li>Consulta los implementos disponibles.</li>
-                            <li>Consulta los préstamos vencidos.</li>
-                        </ul>
-                    </article>
-
-                </div>
-            </div>
-        </section>
-
-        <!--
-            REGLAS DE NEGOCIO
-        -->
-        <section class="section rules" id="reglas">
-            <div class="container">
-
-                <div class="section-heading">
-                    <span class="section-label">Reglas de negocio</span>
-
-                    <h2>
-                        Control y trazabilidad de las operaciones
-                    </h2>
-
-                    <p>
-                        Sports Gear aplica reglas para mantener la
-                        disponibilidad de los implementos y controlar
-                        los préstamos.
-                    </p>
-                </div>
-
-                <!-- Lista numerada de las seis reglas de negocio. -->
-                <ol class="rules-list">
-
+                <ol class="steps">
                     <li>
-                        Cada deportista puede tener como máximo tres implementos
-                        sin devolver y el plazo de cada préstamo es de dos días.
+                        <h3>Registra el catálogo</h3>
+                        <p>
+                            El administrador da de alta cada implemento con su referencia,
+                            su categoría y el total de unidades.
+                        </p>
                     </li>
-
                     <li>
-                        Los deportistas con préstamos vencidos no pueden recibir
-                        nuevos implementos hasta realizar las devoluciones pendientes.
+                        <h3>Presta al deportista</h3>
+                        <p>
+                            El entrenador elige al deportista y los implementos. Las unidades
+                            disponibles bajan al instante y el plazo es de dos días.
+                        </p>
                     </li>
-
                     <li>
-                        Las unidades disponibles siempre deben permanecer
-                        entre cero y el total registrado.
+                        <h3>Recibe la devolución</h3>
+                        <p>
+                            Cada implemento se devuelve por separado y sus unidades vuelven
+                            a quedar disponibles.
+                        </p>
                     </li>
-
-                    <li>
-                        La información del implemento registrada en un préstamo
-                        se conserva como una copia histórica y no cambia cuando
-                        se modifica el catálogo.
-                    </li>
-
-                    <li>
-                        Los préstamos y las devoluciones no se eliminan.
-                        Los implementos del catálogo utilizan baja lógica.
-                    </li>
-
-                    <li>
-                        Las fechas se gestionan en UTC, los mensajes para el usuario
-                        se presentan en español y los identificadores del código
-                        se mantienen en inglés.
-                    </li>
-
                 </ol>
             </div>
         </section>
 
-        <!--
-            REQUISITOS NO FUNCIONALES
-        -->
-        <section class="section quality">
+        <!-- FEATURES: what users can do. -->
+        <section class="band" id="features" aria-labelledby="features-title">
             <div class="container">
-
-                <div class="section-heading">
-                    <span class="section-label">Calidad del sistema</span>
-
-                    <h2>
-                        Requisitos no funcionales
-                    </h2>
-
-                    <p>
-                        Condiciones técnicas que orientan el rendimiento,
-                        la seguridad, la integridad y el despliegue de Sports Gear.
-                    </p>
+                <div class="band-heading">
+                    <h2 id="features-title">Todo el préstamo en un solo lugar</h2>
+                    <p>Del inventario al reporte, cada operación queda registrada.</p>
                 </div>
+                <ul class="feature-list">
+                    <li class="feature">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="4" width="18" height="16" rx="2" />
+                            <path d="M3 10h18M9 4v16" />
+                        </svg>
+                        <div>
+                            <h3>Catálogo con disponibilidad</h3>
+                            <p>Busca por referencia o categoría y mira cuántas unidades quedan libres.</p>
+                        </div>
+                    </li>
+                    <li class="feature">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="7" r="4" />
+                            <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+                        </svg>
+                        <div>
+                            <h3>Deportistas</h3>
+                            <p>Registra a quienes reciben implementos con su nombre y número de documento.</p>
+                        </div>
+                    </li>
+                    <li class="feature">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M7 17 17 7M9 7h8v8" />
+                        </svg>
+                        <div>
+                            <h3>Préstamos</h3>
+                            <p>Entrega hasta tres unidades por deportista en un solo registro.</p>
+                        </div>
+                    </li>
+                    <li class="feature">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 14 4 9l5-5" />
+                            <path d="M4 9h11a5 5 0 0 1 0 10h-3" />
+                        </svg>
+                        <div>
+                            <h3>Devoluciones</h3>
+                            <p>Recibe cada implemento por separado y consulta lo que sigue pendiente.</p>
+                        </div>
+                    </li>
+                    <li class="feature">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 7v5l3 2" />
+                        </svg>
+                        <div>
+                            <h3>Vencidos</h3>
+                            <p>Mira qué implementos pasaron su plazo, quién los tiene y cuántos días lleva de retraso.</p>
+                        </div>
+                    </li>
+                    <li class="feature">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+                        </svg>
+                        <div>
+                            <h3>Más solicitados</h3>
+                            <p>Consulta qué implementos se piden más, en todo el historial o en un período.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
 
-                <!-- Se reutilizan las tarjetas existentes para presentar cada requisito. -->
-                <div class="features-grid">
+        <!-- CATEGORIES: the five catalog categories. -->
+        <section class="band band-white" id="categories" aria-labelledby="categories-title">
+            <div class="container">
+                <div class="band-heading">
+                    <h2 id="categories-title">Cinco categorías desde el primer día</h2>
+                    <p>El catálogo se organiza con las categorías del coliseo, listas para usar.</p>
+                </div>
+                <ul class="category-strip">
+                    <li>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 3c-3 3-3 15 0 18M12 3c3 3 3 15 0 18M3.5 9h17M3.5 15h17" />
+                        </svg>
+                        Balones
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" aria-hidden="true">
+                            <ellipse cx="14" cy="9" rx="6" ry="7" />
+                            <path d="M10 14 4 21M11 6h6M9.5 10h9" />
+                        </svg>
+                        Raquetas
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6z" />
+                        </svg>
+                        Protección
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="15" cy="4.5" r="2" />
+                            <path d="m8 21 3-6 3 2v4M6 12l3-4 4 1 2 3 3 1M11 15l-2-4" />
+                        </svg>
+                        Atletismo
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" aria-hidden="true">
+                            <path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12" />
+                        </svg>
+                        Gimnasio
+                    </li>
+                </ul>
+            </div>
+        </section>
 
-                    <article class="feature-card">
-                        <h3>Rendimiento</h3>
+        <!-- BUSINESS RULES: what the system enforces automatically. -->
+        <section class="band" id="rules" aria-labelledby="rules-title">
+            <div class="container">
+                <div class="band-heading">
+                    <h2 id="rules-title">Reglas que el sistema aplica por ti</h2>
+                    <p>Nadie tiene que recordarlas: Sports Gear las verifica en cada operación.</p>
+                </div>
+                <ul class="rule-list">
+                    <li>
+                        <h3>Máximo tres unidades por deportista</h3>
+                        <p>Un deportista no puede tener más de tres unidades sin devolver.</p>
+                    </li>
+                    <li>
+                        <h3>Dos días para devolver</h3>
+                        <p>Cada préstamo vence 48 horas después de registrarse.</p>
+                    </li>
+                    <li>
+                        <h3>Con vencidos no hay préstamo nuevo</h3>
+                        <p>Quien tenga implementos vencidos debe devolverlos antes de recibir otros.</p>
+                    </li>
+                    <li>
+                        <h3>Disponibilidad siempre exacta</h3>
                         <p>
-                            Las búsquedas deben responder en menos de 300 ms
-                            con un catálogo de referencia de 5.000 implementos.
+                            Las unidades disponibles nunca bajan de cero ni superan el total, aunque
+                            dos entrenadores presten la última unidad al mismo tiempo.
                         </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <h3>Concurrencia</h3>
+                    </li>
+                    <li>
+                        <h3>El préstamo guarda lo que se entregó</h3>
+                        <p>La referencia y la categoría quedan como estaban, aunque luego cambie el catálogo.</p>
+                    </li>
+                    <li>
+                        <h3>Nada se borra</h3>
                         <p>
-                            Si dos operadores intentan entregar la última unidad,
-                            una operación se confirma y la otra recibe HTTP 409.
+                            Préstamos y devoluciones quedan en el historial, y un implemento dado
+                            de baja conserva su historia.
                         </p>
-                    </article>
+                    </li>
+                </ul>
+            </div>
+        </section>
 
-                    <article class="feature-card">
-                        <h3>Seguridad</h3>
-                        <p>
-                            Las contraseñas no se transmiten ni almacenan en texto
-                            plano y nunca deben aparecer en los registros del sistema.
-                        </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <h3>Errores uniformes</h3>
-                        <p>
-                            La API utiliza una estructura uniforme para comunicar
-                            errores HTTP sin exponer información interna.
-                        </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <h3>Despliegue</h3>
-                        <p>
-                            El entorno debe iniciar mediante un solo comando
-                            y permitir comenzar con la base de datos vacía.
-                        </p>
-                    </article>
-
+        <!-- ROLES: permission matrix by role. -->
+        <section class="band band-white" id="roles" aria-labelledby="roles-title">
+            <div class="container">
+                <div class="band-heading">
+                    <h2 id="roles-title">Dos roles, responsabilidades claras</h2>
+                    <p>El administrador organiza el coliseo; el entrenador atiende a los deportistas.</p>
+                </div>
+                <div class="table-wrap">
+                    <table class="roles-table" aria-label="Permisos por rol">
+                        <thead>
+                            <tr>
+                                <th scope="col">Acción</th>
+                                <th scope="col">Administrador</th>
+                                <th scope="col">Entrenador</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Registrar, editar y dar de baja implementos</th>
+                                <td class="yes">Sí</td>
+                                <td class="no">No</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Consultar el catálogo</th>
+                                <td class="yes">Sí, también inactivos</td>
+                                <td class="yes">Sí, activos</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Registrar entrenadores</th>
+                                <td class="yes">Sí</td>
+                                <td class="no">No</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Registrar y consultar deportistas</th>
+                                <td class="yes">Sí</td>
+                                <td class="yes">Sí</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Registrar préstamos y devoluciones</th>
+                                <td class="no">No</td>
+                                <td class="yes">Sí</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Consultar préstamos y vencidos</th>
+                                <td class="yes">Sí</td>
+                                <td class="yes">Sí</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Ver el reporte de más solicitados</th>
+                                <td class="yes">Sí</td>
+                                <td class="no">No</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
 
-        <!--
-            TECNOLOGÍAS
-        -->
-        <section class="section">
+        <!-- QUALITY ATTRIBUTES and technology stack. -->
+        <section class="band" id="quality" aria-labelledby="quality-title">
             <div class="container">
-
-                <div class="section-heading">
-                    <span class="section-label">Tecnología</span>
-
-                    <h2>
-                        Construido con tecnologías modernas
-                    </h2>
-
-                    <p>
-                        Una solución organizada en componentes
-                        independientes para gestionar el sistema.
-                    </p>
+                <div class="band-heading">
+                    <h2 id="quality-title">Rápido, seguro y fácil de poner en marcha</h2>
                 </div>
-
-                <!-- Cada etiqueta representa una tecnología o enfoque del proyecto. -->
-                <div class="technology-list">
-                    <span class="technology-item">React</span>
-                    <span class="technology-item">PHP</span>
-                    <span class="technology-item">Laravel</span>
-                    <span class="technology-item">Base de datos relacional</span>
-                    <span class="technology-item">Docker Compose</span>
-                    <span class="technology-item">Arquitectura hexagonal</span>
-                    <span class="technology-item">Desarrollo guiado por especificación</span>
-                </div>
-
+                <ul class="quality-list">
+                    <li>
+                        <h3>Búsquedas rápidas</h3>
+                        <p>Responden en menos de 300 ms, incluso con miles de implementos.</p>
+                    </li>
+                    <li>
+                        <h3>Sin entregas dobles</h3>
+                        <p>Si dos entrenadores piden la última unidad a la vez, solo uno la obtiene.</p>
+                    </li>
+                    <li>
+                        <h3>Contraseñas protegidas</h3>
+                        <p>Se guardan cifradas y nunca aparecen en los registros.</p>
+                    </li>
+                    <li>
+                        <h3>Mensajes claros</h3>
+                        <p>Cuando algo no es posible, el sistema explica el motivo en español.</p>
+                    </li>
+                    <li>
+                        <h3>Un solo comando</h3>
+                        <p>Todo el sistema se inicia con un comando, listo para usar.</p>
+                    </li>
+                </ul>
+                <p class="stack">
+                    <strong>Construido con</strong> React, PHP con Laravel, una base de datos
+                    relacional y Docker Compose, sobre una arquitectura hexagonal.
+                </p>
             </div>
         </section>
 
     </main>
 
-    <!--
-        PIE DE PÁGINA
-    -->
-    <footer class="footer">
-        <div class="container footer-content">
-
-            <p>
-                <strong>SPORTS GEAR</strong>
-                · Sistema de gestión de implementos deportivos.
-            </p>
-
-            <p>
-                Plan de mejoramiento · A04 · Ficha 3239137 · SENA
-            </p>
-
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            <p><strong>Sports Gear</strong>. Préstamo de implementos deportivos para coliseos.</p>
+            <p>Catálogo, préstamos y devoluciones en un solo sistema.</p>
         </div>
     </footer>
-
 </body>
 
 </html>
