@@ -1,0 +1,82 @@
+# Sports Gear: MySQL database, Laravel API, React app and public site.
+# Start everything from plan-mejoramiento/ with:
+#   docker compose -f infra/docker-compose.yml up --build
+name: sports-gear
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-sports_gear}
+      MYSQL_USER: ${DB_USERNAME:-sports_gear}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in infra/.env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in infra/.env}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/docker/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_NAME: "Sports Gear"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY:-}
+      APP_URL: http://localhost:${API_PORT:-8000}
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: warning
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-sports_gear}
+      DB_USERNAME: ${DB_USERNAME:-sports_gear}
+      DB_PASSWORD: ${DB_PASSWORD}
+      CACHE_STORE: file
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      HASH_DRIVER: argon2id
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in infra/.env}
+      SPORTS_GEAR_ADMIN_USERNAME: ${SPORTS_GEAR_ADMIN_USERNAME:-admin}
+      SPORTS_GEAR_ADMIN_PASSWORD: ${SPORTS_GEAR_ADMIN_PASSWORD:?Set SPORTS_GEAR_ADMIN_PASSWORD in infra/.env}
+    ports:
+      - "${API_PORT:-8000}:80"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/api/v1/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  app:
+    build:
+      context: ..
+      dockerfile: infra/docker/app/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-8080}:80"
+
+  page:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    volumes:
+      - ../page:/usr/share/nginx/html:ro
+    ports:
+      - "${PAGE_PORT:-8081}:80"
+
+volumes:
+  db-data:
