@@ -1,0 +1,16 @@
+# Only the API sources and the API infrastructure files are sent to the build.
+*
+!api/
+!infra/docker/api/
+api/vendor/
+api/node_modules/
+api/.env
+api/.env.*
+!api/.env.example
+api/storage/logs/*
+api/storage/framework/cache/data/*
+api/storage/framework/sessions/*
+api/storage/framework/views/*
+api/bootstrap/cache/*.php
+api/database/*.sqlite
+api/.phpunit.cache/
