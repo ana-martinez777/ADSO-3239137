@@ -8,6 +8,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -59,5 +60,30 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => 'No tienes permisos para realizar esta operación.',
                 'details' => (object) [],
             ], 403);
+        });
+
+        // Último recurso: cualquier error no controlado en la API responde con el
+        // formato uniforme y sin exponer SQL, trazas ni configuración (RNF-04).
+        // Laravel registra el detalle técnico en storage/logs/laravel.log.
+        $exceptions->render(function (\Throwable $exception, Request $request) {
+            if (!$request->is('api/*')) return null;
+
+            if ($exception instanceof HttpExceptionInterface) {
+                $status = $exception->getStatusCode();
+
+                return response()->json([
+                    'code' => $status === 404 ? 'NOT_FOUND' : 'HTTP_ERROR',
+                    'message' => $status === 404
+                        ? 'El recurso solicitado no existe.'
+                        : 'La solicitud no puede procesarse.',
+                    'details' => (object) [],
+                ], $status);
+            }
+
+            return response()->json([
+                'code' => 'INTERNAL_ERROR',
+                'message' => 'Ocurrió un error interno. Intenta nuevamente más tarde.',
+                'details' => (object) [],
+            ], 500);
         });
     })->create();
