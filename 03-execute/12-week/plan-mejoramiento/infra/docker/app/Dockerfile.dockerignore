@@ -1,0 +1,10 @@
+# Only the React sources and the app infrastructure files are sent to the build.
+*
+!app/
+!infra/docker/app/
+app/node_modules/
+app/dist/
+app/coverage/
+app/.env
+app/.env.*
+!app/.env.example
