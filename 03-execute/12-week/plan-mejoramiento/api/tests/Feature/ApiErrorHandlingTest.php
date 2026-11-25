@@ -30,6 +30,17 @@ final class ApiErrorHandlingTest extends TestCase
         $this->assertStringNotContainsString('select', $response->getContent());
     }
 
+    public function test_unauthenticated_request_without_json_accept_header_returns_401(): void
+    {
+        $this->get('/api/v1/categories')
+            ->assertUnauthorized()
+            ->assertExactJson([
+                'code' => 'UNAUTHENTICATED',
+                'message' => 'Debes iniciar sesión para realizar esta operación.',
+                'details' => [],
+            ]);
+    }
+
     public function test_unknown_api_route_returns_not_found_code(): void
     {
         $this->getJson('/api/v1/no-existe')

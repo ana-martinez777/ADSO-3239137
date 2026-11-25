@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // Registra el alias para proteger rutas según el rol.
         $middleware->alias(['role' => EnsureUserHasRole::class]);
+
+        // API guests are never redirected to a login page: they receive a 401.
+        // Without this, a request without "Accept: application/json" tried to
+        // build the missing "login" route and ended as a 500 error.
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('api/*') ? null : '/');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Convierte errores de aplicación al formato uniforme del contrato.
