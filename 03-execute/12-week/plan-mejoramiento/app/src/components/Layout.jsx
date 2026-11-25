@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { navItemsFor, ROLE_LABELS } from '../config/permissions';
+import { BrandMark } from './Brand';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -10,7 +11,7 @@ export default function Layout() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark" aria-hidden="true">SG</span>
+          <BrandMark />
           <span>Sports Gear</span>
         </div>
         <nav aria-label="Navegación principal">

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { homePathFor } from '../config/permissions';
 import { Alert, ApiErrorAlert } from '../components/ui';
+import { BrandMark, CourtLines } from '../components/Brand';
 
 export default function LoginPage() {
   const { login, notice } = useAuth();
@@ -36,9 +37,10 @@ export default function LoginPage() {
 
   return (
     <div className="login-screen">
+      <CourtLines />
       <form className="card login-card" onSubmit={handleSubmit} noValidate>
         <div className="brand brand-large">
-          <span className="brand-mark" aria-hidden="true">SG</span>
+          <BrandMark />
           <span>Sports Gear</span>
         </div>
         <p className="muted">Préstamo de implementos deportivos del coliseo.</p>
