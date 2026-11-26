@@ -1,4 +1,4 @@
-// Utilidades de presentación: textos en español y fechas legibles.
+// Presentation helpers: Spanish labels and readable dates.
 
 export const LOAN_STATUS_LABELS = Object.freeze({
   pending: 'Pendiente',
@@ -26,7 +26,7 @@ export function loanStatusLabel(status) {
   return LOAN_STATUS_LABELS[status] ?? status ?? '—';
 }
 
-/** Muestra una fecha ISO 8601 (UTC) en la hora local del navegador. */
+/** Shows an ISO 8601 (UTC) date in the browser's local time. */
 export function formatDateTime(isoString) {
   if (!isoString) return '—';
   const date = new Date(isoString);
@@ -34,7 +34,7 @@ export function formatDateTime(isoString) {
   return date.toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
 }
 
-/** Convierte los campos de details (VALIDATION_ERROR) en etiquetas en español. */
+/** Converts the details fields (VALIDATION_ERROR) into Spanish labels. */
 export function invalidFieldLabels(details) {
   if (!details || typeof details !== 'object') return [];
   const labels = Object.keys(details).map((field) => {
@@ -44,7 +44,7 @@ export function invalidFieldLabels(details) {
   return [...new Set(labels)];
 }
 
-/** Texto completo de un error de la API para mostrar al usuario. */
+/** Full text of an API error to show to the user. */
 export function errorMessage(error) {
   if (!error) return '';
   const base = error.message || 'Ocurrió un error inesperado.';

@@ -16,7 +16,7 @@ export default function NewLoanPage() {
   const [saving, setSaving] = useState(false);
 
   const athletes = useApiData(() => athletesApi.list(), [], { initialData: [] });
-  // Solo se ofrecen implementos activos; la API vuelve a validar al registrar.
+  // Only active equipment is offered; the API validates again on submit.
   const equipment = useApiData(() => equipmentApi.list({ status: 'active' }), [], { initialData: [] });
 
   const equipmentById = useMemo(() => new Map(equipment.data.map((item) => [item.id, item])), [equipment.data]);
@@ -39,7 +39,7 @@ export default function NewLoanPage() {
       navigate(`/loans/${loan.id}`, { state: { created: true } });
     } catch (err) {
       setApiError(err);
-      // La disponibilidad pudo cambiar por otro entrenador: se actualiza.
+      // Availability may have changed because of another coach: refresh it.
       if (err.code === 'EQUIPMENT_NOT_AVAILABLE' || err.code === 'EQUIPMENT_INACTIVE') equipment.reload();
     } finally {
       setSaving(false);
@@ -123,7 +123,7 @@ export default function NewLoanPage() {
   );
 }
 
-// Construye el cuerpo de POST /loans con los campos definidos en el contrato.
+// Builds the POST /loans body with the fields defined in the contract.
 export function buildLoanPayload(athleteId, rows) {
   return {
     athlete_id: athleteId,

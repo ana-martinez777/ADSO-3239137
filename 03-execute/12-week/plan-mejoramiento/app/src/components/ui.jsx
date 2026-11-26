@@ -1,4 +1,4 @@
-// Componentes visuales reutilizables sin lógica de negocio.
+// Reusable visual components without business logic.
 import { errorMessage, loanStatusLabel } from '../utils/format';
 
 export function PageHeader({ title, description, actions }) {

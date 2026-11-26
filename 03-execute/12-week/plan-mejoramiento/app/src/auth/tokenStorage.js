@@ -1,8 +1,8 @@
-// Persistencia de la sesión en sessionStorage.
-// - Se borra al cerrar la pestaña o el navegador.
-// - Se guarda la fecha de expiración calculada con expires_in (8 horas)
-//   para descartar tokens vencidos sin esperar un 401.
-// - Nunca se guarda la contraseña.
+// Session persistence in sessionStorage.
+// - It is cleared when the tab or browser is closed.
+// - The expiration time computed from expires_in (8 hours) is stored
+//   to discard expired tokens without waiting for a 401.
+// - The password is never stored.
 
 const STORAGE_KEY = 'sports_gear_session';
 
@@ -36,6 +36,6 @@ export function clearSession() {
   try {
     sessionStorage.removeItem(STORAGE_KEY);
   } catch {
-    // El almacenamiento puede no estar disponible; no hay nada que limpiar.
+    // Storage may be unavailable; there is nothing to clear.
   }
 }

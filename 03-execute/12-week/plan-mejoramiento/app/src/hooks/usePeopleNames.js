@@ -5,11 +5,11 @@ import { shortId } from '../utils/format';
 import { useApiData } from './useApiData';
 
 /**
- * Los préstamos de la API traen athlete_id y user_id.
- * Este hook resuelve los nombres para mostrarlos:
- * - Deportistas: GET /athletes (admin y coach).
- * - Entrenadores: GET /users/coaches, que el contrato reserva al admin.
- *   Para un entrenador se muestra "Tú" en sus propios préstamos.
+ * Loans from the API include athlete_id and user_id.
+ * This hook resolves the names to display:
+ * - Athletes: GET /athletes (admin and coach).
+ * - Coaches: GET /users/coaches, which the contract restricts to admin.
+ *   A coach sees "Tú" on their own loans.
  */
 export function usePeopleNames(user) {
   const isAdmin = can.manageCoaches(user.role);

@@ -16,8 +16,8 @@ function renderApp() {
   );
 }
 
-describe('inicio de sesión (HU-01)', () => {
-  it('pide los datos obligatorios sin llamar a la API', async () => {
+describe('login (HU-01)', () => {
+  it('asks for required fields without calling the API', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch');
     renderApp();
     await userEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
@@ -26,7 +26,7 @@ describe('inicio de sesión (HU-01)', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('muestra en español el error de credenciales incorrectas', async () => {
+  it('shows the invalid credentials error in Spanish', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       jsonResponse(401, { code: 'INVALID_CREDENTIALS', message: 'Las credenciales de acceso son incorrectas.', details: {} }),
     );
@@ -39,7 +39,7 @@ describe('inicio de sesión (HU-01)', () => {
     expect(screen.getByLabelText('Contraseña')).toHaveValue('');
   });
 
-  it('entra con las opciones del entrenador después de un inicio de sesión correcto', async () => {
+  it('enters with coach options after a successful login', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
       if (String(url).endsWith('/auth/login')) {
         return jsonResponse(200, {

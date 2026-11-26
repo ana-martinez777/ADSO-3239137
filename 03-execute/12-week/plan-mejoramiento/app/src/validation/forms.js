@@ -1,10 +1,10 @@
-// Validaciones complementarias del frontend.
-// No reemplazan las del backend (docs/architecture.md, sección 13):
-// solo evitan enviar peticiones que la API rechazaría con seguridad.
+// Complementary frontend validations.
+// They do not replace backend validation (docs/architecture.md, section 13):
+// they only avoid sending requests the API would certainly reject.
 
 export const MAX_PENDING_UNITS = 3;
 
-/** Filtros de período: ambas fechas o ninguna, y desde <= hasta. */
+/** Period filters: both dates or none, and from <= to. */
 export function validateDateRange(from, to) {
   if (!from && !to) return null;
   if (!from || !to) return 'Para consultar un período debes indicar la fecha inicial y la fecha final.';
@@ -13,10 +13,10 @@ export function validateDateRange(from, to) {
 }
 
 /**
- * Revisa el borrador de un préstamo antes de enviarlo.
+ * Checks a loan draft before sending it.
  * @param {{athleteId: string, items: {equipmentId: string, quantity: number|string}[]}} draft
  * @param {Map<string, {available_units: number, reference: string}>} equipmentById
- * @returns {string[]} lista de errores en español
+ * @returns {string[]} list of error messages in Spanish
  */
 export function validateLoanDraft(draft, equipmentById = new Map()) {
   const errors = [];

@@ -26,7 +26,7 @@ export default function CoachesPage() {
     if (errors.length > 0) return;
     setSaving(true);
     try {
-      // El rol no se envía: la API siempre asigna "coach".
+      // The role is not sent: the API always assigns "coach".
       const created = await coachesApi.create({ username: form.username.trim(), password: form.password });
       setSuccess(`Entrenador ${created.username} registrado.`);
       setForm(EMPTY_FORM);

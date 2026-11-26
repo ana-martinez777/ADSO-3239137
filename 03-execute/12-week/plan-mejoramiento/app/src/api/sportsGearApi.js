@@ -1,5 +1,5 @@
-// Operaciones del contrato docs/api-contract.md (prefijo /api/v1).
-// Cada función devuelve directamente la propiedad "data" de la respuesta.
+// Operations from docs/api-contract.md (prefix /api/v1).
+// Each function returns the response "data" property directly.
 import { request } from './client';
 
 const data = (promise) => promise.then((payload) => payload?.data ?? null);

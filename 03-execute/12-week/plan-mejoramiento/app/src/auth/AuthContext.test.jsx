@@ -16,8 +16,8 @@ function renderAt(path) {
   );
 }
 
-describe('sesión al recargar la aplicación', () => {
-  it('las primeras peticiones de una pantalla incluyen el token guardado', async () => {
+describe('session after reloading the app', () => {
+  it('the first requests of a page include the stored token', async () => {
     saveSession({ access_token: 'jwt-guardado', expires_in: 3600, user: { id: 'a1', username: 'admin', role: 'admin' } });
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(200, { data: [] }));
 
@@ -30,7 +30,7 @@ describe('sesión al recargar la aplicación', () => {
     expect(await screen.findByText('No hay implementos que coincidan con la búsqueda.')).toBeInTheDocument();
   });
 
-  it('cierra la sesión y lo informa cuando la API responde 401', async () => {
+  it('logs out and notifies the user when the API responds 401', async () => {
     saveSession({ access_token: 'jwt-vencido', expires_in: 3600, user: { id: 'a1', username: 'admin', role: 'admin' } });
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       jsonResponse(401, { code: 'UNAUTHENTICATED', message: 'Debes iniciar sesión para realizar esta operación.', details: {} }),

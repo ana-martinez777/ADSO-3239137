@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, buildQuery, configureClient, request } from './client';
 import { jsonResponse } from '../test/setup';
 
-describe('cliente HTTP', () => {
+describe('HTTP client', () => {
   let onUnauthorized;
 
   beforeEach(() => {
@@ -10,12 +10,12 @@ describe('cliente HTTP', () => {
     configureClient({ tokenProvider: () => 'token-123', onUnauthorized });
   });
 
-  it('omite los parámetros vacíos al construir la consulta', () => {
+  it('skips empty parameters when building the query', () => {
     expect(buildQuery({ search: 'BAL', category_id: '', status: undefined, from: null })).toBe('?search=BAL');
     expect(buildQuery({})).toBe('');
   });
 
-  it('envía el token Bearer y el prefijo /api/v1', async () => {
+  it('sends the Bearer token and the /api/v1 prefix', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(200, { data: [] }));
     await request('/equipment', { query: { status: 'active' } });
 
@@ -24,7 +24,7 @@ describe('cliente HTTP', () => {
     expect(options.headers.Authorization).toBe('Bearer token-123');
   });
 
-  it('convierte el error uniforme de la API en ApiError', async () => {
+  it('converts the uniform API error into ApiError', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       jsonResponse(409, { code: 'EQUIPMENT_NOT_AVAILABLE', message: 'No hay unidades disponibles del implemento solicitado.', details: {} }),
     );
@@ -36,18 +36,18 @@ describe('cliente HTTP', () => {
     });
   });
 
-  it('devuelve null en respuestas 204', async () => {
+  it('returns null on 204 responses', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true, status: 204, json: async () => { throw new Error('sin cuerpo'); } });
     await expect(request('/equipment/1', { method: 'DELETE' })).resolves.toBeNull();
   });
 
-  it('avisa a la sesión cuando la API responde 401 con un token enviado', async () => {
+  it('notifies the session when the API responds 401 to a sent token', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(401, { code: 'UNAUTHENTICATED', message: 'Debes iniciar sesión.', details: {} }));
     await expect(request('/athletes')).rejects.toBeInstanceOf(ApiError);
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
   });
 
-  it('no muestra textos técnicos cuando la respuesta no tiene el formato del contrato', async () => {
+  it('does not show technical text when the response lacks the contract format', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       jsonResponse(500, { message: 'SQLSTATE[HY000] [1044] Access denied ... select * from `users`' }),
     );
@@ -58,7 +58,7 @@ describe('cliente HTTP', () => {
     expect(error.message).not.toContain('SQLSTATE');
   });
 
-  it('informa en español cuando no se puede conectar con el servidor', async () => {
+  it('reports in Spanish when the server cannot be reached', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
     await expect(request('/health')).rejects.toMatchObject({ code: 'NETWORK_ERROR', status: 0 });
   });

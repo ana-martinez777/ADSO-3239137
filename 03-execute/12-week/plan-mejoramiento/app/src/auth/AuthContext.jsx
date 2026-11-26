@@ -17,9 +17,9 @@ export function AuthProvider({ children }) {
     setNotice(message);
   }, []);
 
-  // El cliente HTTP obtiene el token desde aquí y cierra la sesión ante un 401.
-  // useLayoutEffect se ejecuta antes que los useEffect de las pantallas hijas,
-  // así las primeras peticiones después de recargar ya llevan el token.
+  // The HTTP client reads the token from here and logs out on a 401.
+  // useLayoutEffect runs before the useEffect hooks of child pages,
+  // so the first requests after a reload already carry the token.
   useLayoutEffect(() => {
     configureClient({
       tokenProvider: () => sessionRef.current?.token ?? null,
@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
     });
   }, [logout]);
 
-  // Cierre automático cuando se cumplen las 8 horas de vigencia del token.
+  // Automatic logout when the token's 8-hour lifetime ends.
   useEffect(() => {
     if (!session) return undefined;
     const remaining = session.expiresAt - Date.now();

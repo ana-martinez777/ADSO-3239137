@@ -8,7 +8,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-/** Respuesta simulada de fetch con cuerpo JSON. */
+/** Fake fetch response with a JSON body. */
 export function jsonResponse(status, body) {
   return {
     ok: status >= 200 && status < 300,

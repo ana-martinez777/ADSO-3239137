@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
- * Ejecuta una consulta a la API y expone { data, error, loading, reload }.
- * La consulta se repite cuando cambian las dependencias indicadas.
+ * Runs an API query and exposes { data, error, loading, reload }.
+ * The query runs again when the given dependencies change.
  */
 export function useApiData(loader, deps = [], { initialData = null, enabled = true } = {}) {
   const [data, setData] = useState(initialData);

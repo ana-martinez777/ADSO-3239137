@@ -1,5 +1,5 @@
-// Permisos de la interfaz según la tabla 8.3 de docs/api-contract.md.
-// La interfaz solo oculta opciones; la autorización real la aplica la API.
+// UI permissions based on table 8.3 of docs/api-contract.md.
+// The UI only hides options; the API enforces the actual authorization.
 
 export const ROLES = Object.freeze({ ADMIN: 'admin', COACH: 'coach' });
 

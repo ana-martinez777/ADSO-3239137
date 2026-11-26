@@ -1,8 +1,8 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// En desarrollo, las peticiones a /api se redirigen al backend Laravel.
-// Así el navegador trabaja con un único origen y no se necesita CORS local.
+// In development, /api requests are proxied to the Laravel backend.
+// The browser works with a single origin, so no local CORS setup is needed.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiTarget = env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8000';

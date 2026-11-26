@@ -2,7 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { hasRole } from '../config/permissions';
 
-/** Exige sesión iniciada y, si se indican, uno de los roles permitidos. */
+/** Requires an active session and, when given, one of the allowed roles. */
 export default function ProtectedRoute({ roles, children }) {
   const { user } = useAuth();
   const location = useLocation();

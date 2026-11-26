@@ -31,15 +31,15 @@ function renderPage() {
   );
 }
 
-describe('registro de préstamos (HU-06)', () => {
-  it('construye el cuerpo exacto del contrato POST /loans', () => {
+describe('loan registration (HU-06)', () => {
+  it('builds the exact POST /loans contract body', () => {
     expect(buildLoanPayload('a1', [{ equipmentId: 'e1', quantity: '2' }, { equipmentId: '', quantity: 1 }])).toEqual({
       athlete_id: 'a1',
       items: [{ equipment_id: 'e1', quantity: 2 }],
     });
   });
 
-  it('no envía el préstamo si supera las unidades permitidas', async () => {
+  it('does not send the loan if it exceeds the allowed units', async () => {
     const post = vi.fn();
     mockApi(post);
     renderPage();
@@ -54,7 +54,7 @@ describe('registro de préstamos (HU-06)', () => {
     expect(post).not.toHaveBeenCalled();
   });
 
-  it('muestra la regla de negocio que devuelve la API', async () => {
+  it('shows the business rule returned by the API', async () => {
     mockApi(() => jsonResponse(409, { code: 'ATHLETE_HAS_OVERDUE_LOANS', message: 'El deportista tiene préstamos vencidos.', details: {} }));
     renderPage();
     await userEvent.selectOptions(await screen.findByLabelText('Deportista'), 'a1');
@@ -64,7 +64,7 @@ describe('registro de préstamos (HU-06)', () => {
     expect(await screen.findByText('El deportista tiene préstamos vencidos.')).toBeInTheDocument();
   });
 
-  it('abre el detalle del préstamo cuando la API lo registra', async () => {
+  it('opens the loan detail when the API registers it', async () => {
     mockApi((body) => jsonResponse(201, { data: { id: 'l1', ...body, items: [] } }));
     renderPage();
     await userEvent.selectOptions(await screen.findByLabelText('Deportista'), 'a1');

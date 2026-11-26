@@ -21,19 +21,19 @@ function renderAt(path, roles) {
 const login = (role) => saveSession({ access_token: 't', expires_in: 3600, user: { id: '1', username: 'u', role } });
 
 describe('ProtectedRoute', () => {
-  it('redirige al inicio de sesión si no hay sesión', () => {
+  it('redirects to login when there is no session', () => {
     renderAt('/coaches', ['admin']);
     expect(screen.getByText('Pantalla de inicio de sesión')).toBeInTheDocument();
   });
 
-  it('bloquea a un rol no autorizado', () => {
+  it('blocks an unauthorized role', () => {
     login('coach');
     renderAt('/coaches', ['admin']);
     expect(screen.getByText('Acceso no permitido')).toBeInTheDocument();
     expect(screen.queryByText('Contenido privado')).not.toBeInTheDocument();
   });
 
-  it('muestra el contenido al rol autorizado', () => {
+  it('shows the content to an authorized role', () => {
     login('admin');
     renderAt('/coaches', ['admin']);
     expect(screen.getByText('Contenido privado')).toBeInTheDocument();

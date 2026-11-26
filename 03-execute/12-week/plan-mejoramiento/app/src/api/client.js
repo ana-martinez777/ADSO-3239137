@@ -1,6 +1,6 @@
-// Cliente HTTP único de la aplicación.
-// Centraliza el prefijo de la API, el encabezado Authorization y la
-// conversión de errores al formato uniforme { code, message, details }.
+// Single HTTP client for the application.
+// Centralizes the API prefix, the Authorization header and the
+// conversion of errors to the uniform { code, message, details } format.
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/$/, '');
 
@@ -17,13 +17,13 @@ export class ApiError extends Error {
 let getToken = () => null;
 let handleUnauthorized = () => {};
 
-/** Permite que la capa de sesión entregue el token y reaccione a un 401. */
+/** Lets the session layer provide the token and react to a 401. */
 export function configureClient({ tokenProvider, onUnauthorized } = {}) {
   if (tokenProvider) getToken = tokenProvider;
   if (onUnauthorized) handleUnauthorized = onUnauthorized;
 }
 
-/** Construye la cadena de consulta omitiendo los valores vacíos. */
+/** Builds the query string, skipping empty values. */
 export function buildQuery(params = {}) {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -62,9 +62,9 @@ export async function request(path, { method = 'GET', body, query } = {}) {
   }
 
   if (!response.ok) {
-    // Solo se muestra el mensaje del servidor cuando viene con el formato
-    // uniforme del contrato (tiene "code"). Así nunca se muestran textos
-    // técnicos, como errores SQL, si la API falla de forma no controlada.
+    // The server message is shown only when it uses the contract's
+    // uniform format (has "code"). This way technical text, such as
+    // SQL errors, is never shown if the API fails unexpectedly.
     const isContractError = typeof payload?.code === 'string';
     const error = new ApiError(
       response.status,
@@ -72,7 +72,7 @@ export async function request(path, { method = 'GET', body, query } = {}) {
       isContractError && payload.message ? payload.message : fallbackMessage(response.status),
       isContractError ? payload.details : {},
     );
-    // Un 401 con sesión activa significa token vencido o inválido.
+    // A 401 with an active session means an expired or invalid token.
     if (response.status === 401 && token) handleUnauthorized(error);
     throw error;
   }

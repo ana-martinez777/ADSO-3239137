@@ -3,19 +3,19 @@ import { can, hasRole, homePathFor, navItemsFor, ROUTE_ROLES } from './permissio
 
 const paths = (role) => navItemsFor(role).map((item) => item.path);
 
-describe('permisos por rol (api-contract.md, tabla 8.3)', () => {
-  it('el administrador ve entrenadores y reporte, pero no el registro de préstamos', () => {
+describe('role permissions (api-contract.md, table 8.3)', () => {
+  it('admin sees coaches and the report, but not loan registration', () => {
     expect(paths('admin')).toEqual(expect.arrayContaining(['/coaches', '/reports/most-requested', '/equipment', '/loans', '/overdue']));
     expect(paths('admin')).not.toContain('/loans/new');
   });
 
-  it('el entrenador registra préstamos, pero no ve entrenadores ni reporte', () => {
+  it('coach registers loans, but does not see coaches or the report', () => {
     expect(paths('coach')).toContain('/loans/new');
     expect(paths('coach')).not.toContain('/coaches');
     expect(paths('coach')).not.toContain('/reports/most-requested');
   });
 
-  it('las acciones coinciden con la tabla de autorización', () => {
+  it('actions match the authorization table', () => {
     expect(can.manageEquipment('admin')).toBe(true);
     expect(can.manageEquipment('coach')).toBe(false);
     expect(can.viewInactiveEquipment('coach')).toBe(false);
@@ -25,13 +25,13 @@ describe('permisos por rol (api-contract.md, tabla 8.3)', () => {
     expect(can.viewReport('coach')).toBe(false);
   });
 
-  it('valida el rol del usuario contra una ruta', () => {
+  it('checks the user role against a route', () => {
     expect(hasRole({ role: 'coach' }, ROUTE_ROLES.report)).toBe(false);
     expect(hasRole({ role: 'admin' }, ROUTE_ROLES.report)).toBe(true);
     expect(hasRole(null, ROUTE_ROLES.equipment)).toBe(false);
   });
 
-  it('cada rol tiene una pantalla de inicio permitida', () => {
+  it('each role has an allowed home screen', () => {
     expect(paths('admin')).toContain(homePathFor('admin'));
     expect(paths('coach')).toContain(homePathFor('coach'));
   });
