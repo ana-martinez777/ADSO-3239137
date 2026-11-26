@@ -1,0 +1,12 @@
+{
+  "name": "sports-gear-seeder",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Demo data seeder for Sports Gear. Uses only the public API.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "seed": "node src/seed.js",
+    "test": "node --test"
+  }
+}
