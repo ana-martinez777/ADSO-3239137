@@ -1,12 +1,14 @@
 <?php
 namespace App\Providers;
 
+use App\Application\Ports\Clock;
 use App\Application\Ports\PasswordHasher;
 use App\Application\Ports\TokenIssuer;
 use App\Application\Ports\UserRepository;
 use App\Application\Ports\SportsGearRepository;
 use App\Infrastructure\Persistence\EloquentUserRepository;
 use App\Infrastructure\Security\LaravelPasswordHasher;
+use App\Infrastructure\Time\SystemClock;
 use App\Infrastructure\Persistence\EloquentSportsGearRepository;
 use App\Models\User;
 use App\Services\Auth\JwtService;
@@ -17,17 +19,18 @@ use Exception;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /** Registra las implementaciones concretas de los puertos. */
+    /** Registers the concrete implementations of the ports. */
     public function register(): void
     {
-        // Conecta los contratos de aplicación con los adaptadores de Laravel.
+        // Connects the application contracts with the Laravel adapters.
         $this->app->bind(UserRepository::class, EloquentUserRepository::class);
         $this->app->bind(SportsGearRepository::class, EloquentSportsGearRepository::class);
         $this->app->bind(PasswordHasher::class, LaravelPasswordHasher::class);
         $this->app->bind(TokenIssuer::class, JwtService::class);
+        $this->app->bind(Clock::class, SystemClock::class);
     }
 
-    /** Registra el guard JWT que protege las rutas de la API. */
+    /** Registers the JWT guard that protects the API routes. */
     public function boot(): void
     {
         Auth::viaRequest('jwt', function (Request $request) {
@@ -46,7 +49,7 @@ class AppServiceProvider extends ServiceProvider
                 return null;
             }
 
-            // Consulta el rol vigente en la base de datos, no solo el claim del token.
+            // Reads the current role from the database, not only the token claim.
             return User::find($payload->sub);
         });
     }

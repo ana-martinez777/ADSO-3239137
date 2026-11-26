@@ -2,9 +2,13 @@
 
 namespace App\Infrastructure\Persistence;
 
+use App\Application\Ports\Clock;
 use App\Application\Ports\SportsGearRepository;
+use App\Domain\Athletes\Athlete as AthleteProfile;
 use App\Domain\Inventory\EquipmentInventory;
 use App\Domain\Loans\LoanPolicy;
+use App\Domain\Shared\DateRange;
+use App\Domain\Shared\Quantity;
 use App\Exceptions\ApiException;
 use App\Models\Athlete;
 use App\Models\Category;
@@ -18,6 +22,8 @@ use Illuminate\Support\Facades\DB;
 
 final class EloquentSportsGearRepository implements SportsGearRepository
 {
+    public function __construct(private readonly Clock $clock) {}
+
     public function categories(): array
     {
         return Category::query()->orderBy('name')->get(['id', 'name'])->toArray();
@@ -139,7 +145,7 @@ final class EloquentSportsGearRepository implements SportsGearRepository
             throw new ApiException('NOT_FOUND', 'El implemento solicitado no existe.', 404);
         }
         if ($equipment->deleted_at === null) {
-            $equipment->update(['deleted_at' => CarbonImmutable::now('UTC')]);
+            $equipment->update(['deleted_at' => $this->now()]);
         }
     }
 
@@ -167,7 +173,8 @@ final class EloquentSportsGearRepository implements SportsGearRepository
     public function athleteCreate(array $data): array
     {
         try {
-            $athlete = Athlete::query()->create($data);
+            $profile = AthleteProfile::register((string) ($data['full_name'] ?? ''), (string) ($data['document_number'] ?? ''));
+            $athlete = Athlete::query()->create($profile->toArray());
         } catch (QueryException $exception) {
             if (($exception->errorInfo[0] ?? null) === '23000') {
                 throw new ApiException('DOCUMENT_NUMBER_ALREADY_EXISTS', 'El documento ya está registrado.', 409);
@@ -186,7 +193,7 @@ final class EloquentSportsGearRepository implements SportsGearRepository
             }
 
             LoanPolicy::assertUniqueEquipment($items);
-            $now = CarbonImmutable::now('UTC');
+            $now = $this->now();
             $overdueExists = LoanItem::query()->whereNull('returned_at')
                 ->where('due_at', '<=', $now)
                 ->whereHas('loan', fn ($query) => $query->where('athlete_id', $athleteId))
@@ -198,7 +205,7 @@ final class EloquentSportsGearRepository implements SportsGearRepository
                 ->where('loans.athlete_id', $athleteId)
                 ->whereNull('loan_items.returned_at')
                 ->sum('loan_items.quantity');
-            $requestedUnits = array_sum(array_map(static fn (array $item): int => (int) $item['quantity'], $items));
+            $requestedUnits = Quantity::sum(array_map(static fn (array $item): int => (int) $item['quantity'], $items));
             LoanPolicy::assertWithinPendingLimit($currentPending, $requestedUnits);
 
             $equipmentIds = array_map(static fn (array $item): string => (string) $item['equipment_id'], $items);
@@ -257,7 +264,7 @@ final class EloquentSportsGearRepository implements SportsGearRepository
                 $query->where($field, $filters[$field]);
             }
         }
-        $now = CarbonImmutable::now('UTC');
+        $now = $this->now();
         $loans = $query->orderByDesc('loaned_at')->get()->map(fn (Loan $loan): array => $this->loanData($loan, false, $now))->all();
         if (!empty($filters['status'])) {
             $loans = array_values(array_filter($loans, fn (array $loan): bool => $loan['status'] === $filters['status']));
@@ -276,7 +283,7 @@ final class EloquentSportsGearRepository implements SportsGearRepository
 
     public function overdueList(?string $athleteId = null): array
     {
-        $now = CarbonImmutable::now('UTC');
+        $now = $this->now();
         $query = LoanItem::query()->with('loan.athlete')
             ->whereNull('returned_at')->where('due_at', '<=', $now);
         if ($athleteId !== null) {
@@ -311,7 +318,7 @@ final class EloquentSportsGearRepository implements SportsGearRepository
             if (!$equipment) {
                 throw new ApiException('NOT_FOUND', 'El implemento asociado no existe.', 404);
             }
-            $item->update(['returned_at' => CarbonImmutable::now('UTC')]);
+            $item->update(['returned_at' => $this->now()]);
             $equipment->increment('available_units', (int) $item->quantity);
 
             return [
@@ -363,7 +370,7 @@ final class EloquentSportsGearRepository implements SportsGearRepository
 
     private function loanData(Loan $loan, bool $includeItems, ?CarbonImmutable $now = null): array
     {
-        $now ??= CarbonImmutable::now('UTC');
+        $now ??= $this->now();
         $items = $loan->loanItems->map(fn (LoanItem $item): array => [
             'id' => $item->id,
             'loan_id' => $item->loan_id,
@@ -398,14 +405,12 @@ final class EloquentSportsGearRepository implements SportsGearRepository
 
     private function assertDateRange(array $filters): void
     {
-        $hasFrom = !empty($filters['from']);
-        $hasTo = !empty($filters['to']);
-        if ($hasFrom !== $hasTo) {
-            throw new ApiException('VALIDATION_ERROR', 'Debes enviar conjuntamente las fechas from y to.', 422);
-        }
-        if ($hasFrom && CarbonImmutable::parse($filters['from'])->gt(CarbonImmutable::parse($filters['to']))) {
-            throw new ApiException('INVALID_DATE_RANGE', 'La fecha inicial no puede ser posterior a la fecha final.', 422);
-        }
+        DateRange::fromFilters($filters['from'] ?? null, $filters['to'] ?? null);
+    }
+
+    private function now(): CarbonImmutable
+    {
+        return CarbonImmutable::instance($this->clock->now())->utc();
     }
 
     private function dateString(mixed $date): ?string
