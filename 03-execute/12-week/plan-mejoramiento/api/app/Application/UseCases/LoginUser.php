@@ -18,10 +18,10 @@ final class LoginUser
     /** @return array{token: string, user: UserAccount} */
     public function execute(string $username, string $password): array
     {
-        // Normaliza el nombre de usuario antes de consultar el repositorio.
+        // Normalizes the username before querying the repository.
         $user = $this->users->findByUsername(strtolower(trim($username)));
 
-        // Usa un mensaje genérico para no revelar si existe el usuario.
+        // Uses a generic message so it does not reveal whether the user exists.
         if (!$user || !$this->passwords->verify($password, $user->passwordHash)) {
             throw new ApiException(
                 'INVALID_CREDENTIALS',

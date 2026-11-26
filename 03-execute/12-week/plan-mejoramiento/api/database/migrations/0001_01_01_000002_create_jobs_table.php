@@ -3,13 +3,13 @@
 use Illuminate\Database\Migrations\Migration;
 
 /**
- * Migración conservada para mantener el historial inicial de Laravel.
- * Sports Gear ejecuta las tareas de forma síncrona.
+ * Kept to preserve the initial Laravel migration history.
+ * Sports Gear runs jobs synchronously.
  */
 return new class extends Migration
 {
     /**
-     * No se crean tablas porque no utilizamos colas persistentes.
+     * No tables are created because persistent queues are not used.
      */
     public function up(): void
     {
@@ -17,7 +17,7 @@ return new class extends Migration
     }
 
     /**
-     * No hay tablas que eliminar al revertir esta migración.
+     * There are no tables to drop when this migration is rolled back.
      */
     public function down(): void
     {

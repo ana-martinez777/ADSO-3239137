@@ -11,17 +11,17 @@ class Loan extends Model
 {
     use HasVersion4Uuids;
 
-    // Define los campos que pueden asignarse masivamente.
+    // Fields that can be mass-assigned.
     protected $fillable = [
         'athlete_id',
         'user_id',
         'loaned_at',
     ];
 
-    // La tabla no utiliza created_at ni updated_at.
+    // The table does not use created_at or updated_at.
     public $timestamps = false;
 
-    // Convierte loaned_at en una instancia de fecha.
+    // Casts loaned_at to a date instance.
     protected function casts(): array
     {
         return [
@@ -29,19 +29,19 @@ class Loan extends Model
         ];
     }
 
-    // Relaciona el préstamo con el deportista que lo recibe.
+    // The athlete who receives the loan.
     public function athlete(): BelongsTo
     {
         return $this->belongsTo(Athlete::class);
     }
 
-    // Relaciona el préstamo con el entrenador que lo registra.
+    // The coach who registers the loan.
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // Permite consultar los implementos incluidos en el préstamo.
+    // Items included in the loan.
     public function loanItems(): HasMany
     {
         return $this->hasMany(LoanItem::class);

@@ -8,7 +8,7 @@ use Mockery;
 use RuntimeException;
 use Tests\TestCase;
 
-/** RNF-04: los errores no controlados mantienen el formato uniforme y no exponen datos internos. */
+/** RNF-04: unhandled errors keep the uniform format and do not expose internal data. */
 final class ApiErrorHandlingTest extends TestCase
 {
     public function test_unexpected_errors_return_uniform_body_without_internal_details(): void

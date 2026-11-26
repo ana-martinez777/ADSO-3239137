@@ -7,25 +7,25 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Crea la tabla de deportistas.
+     * Creates the athletes table.
      */
     public function up(): void
     {
         Schema::create('athletes', function (Blueprint $table) {
 
-            // Identificador UUID v4 almacenado en 36 caracteres.
+            // UUID v4 stored in 36 characters.
             $table->char('id', 36)->primary();
 
-            // Nombre completo del deportista.
+            // Athlete's full name.
             $table->string('full_name', 200);
 
-            // Número de documento único para cada deportista.
+            // Unique document number of each athlete.
             $table->string('document_number', 30)->unique();
         });
     }
 
     /**
-     * Elimina la tabla de deportistas al revertir la migración.
+     * Drops the athletes table when the migration is rolled back.
      */
     public function down(): void
     {

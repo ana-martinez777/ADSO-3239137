@@ -7,49 +7,49 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Crea la tabla de préstamos.
+     * Creates the loans table.
      */
     public function up(): void
     {
         Schema::create('loans', function (Blueprint $table) {
 
-            // Identificador UUID v4 del préstamo.
+            // UUID v4 of the loan.
             $table->char('id', 36)->primary();
 
-            // Identificador del deportista que recibe el préstamo.
+            // Athlete who receives the loan.
             $table->char('athlete_id', 36);
 
-            // Identificador del entrenador que registra el préstamo.
+            // Coach who registers the loan.
             $table->char('user_id', 36);
 
-            // Fecha y hora en UTC en que se registra el préstamo.
+            // UTC date and time when the loan is registered.
             $table->dateTime('loaned_at', 6);
 
-            // Relaciona el préstamo con el deportista correspondiente.
+            // Links the loan with its athlete.
             $table->foreign('athlete_id')
                 ->references('id')
                 ->on('athletes')
                 ->restrictOnDelete();
 
-            // Relaciona el préstamo con el usuario que lo registra.
+            // Links the loan with the user who registers it.
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users')
                 ->restrictOnDelete();
 
-            // Facilita la consulta de préstamos por deportista y fecha.
+            // Speeds up loan queries by athlete and date.
             $table->index(['athlete_id', 'loaned_at']);
 
-            // Facilita la consulta de préstamos por usuario.
+            // Speeds up loan queries by user.
             $table->index('user_id');
 
-            // Facilita la consulta por fecha de registro.
+            // Speeds up queries by registration date.
             $table->index('loaned_at');
         });
     }
 
     /**
-     * Elimina la tabla de préstamos al revertir esta migración.
+     * Drops the loans table when this migration is rolled back.
      */
     public function down(): void
     {

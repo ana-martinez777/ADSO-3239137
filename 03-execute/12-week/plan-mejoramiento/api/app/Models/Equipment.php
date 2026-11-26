@@ -11,7 +11,7 @@ class Equipment extends Model
 {
     use HasVersion4Uuids;
 
-    // Permite asignar los atributos del implemento.
+    // Equipment attributes that can be mass-assigned.
     protected $fillable = [
         'reference',
         'category_id',
@@ -20,10 +20,10 @@ class Equipment extends Model
         'deleted_at',
     ];
 
-    // Indica que la tabla no utiliza created_at ni updated_at.
+    // The table does not use created_at or updated_at.
     public $timestamps = false;
 
-    // Convierte deleted_at en una fecha para trabajar con ella en PHP.
+    // Casts deleted_at to a date so it can be used in PHP.
     protected function casts(): array
     {
         return [
@@ -31,19 +31,19 @@ class Equipment extends Model
         ];
     }
 
-    // Define que cada implemento pertenece a una categoría.
+    // Each piece of equipment belongs to one category.
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    // Permite consultar los detalles de préstamos de este implemento.
+    // Loan items for this equipment.
     public function loanItems(): HasMany
     {
         return $this->hasMany(LoanItem::class);
     }
 
-    // Permite consultar el historial de referencias del implemento.
+    // Reference history of this equipment.
     public function referenceHistory(): HasMany
     {
         return $this->hasMany(EquipmentReferenceHistory::class);

@@ -8,26 +8,26 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Crea la tabla de usuarios de Sports Gear.
+     * Creates the Sports Gear users table.
      */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
 
-            // Identificador UUID v4 almacenado como cadena de 36 caracteres.
+            // UUID v4 stored as a 36-character string.
             $table->char('id', 36)->primary();
 
-            // Nombre de usuario único utilizado para iniciar sesión.
+            // Unique username used to log in.
             $table->string('username', 120)->unique();
 
-            // Contraseña almacenada mediante un hash Argon2id.
+            // Password stored as an Argon2id hash.
             $table->string('password_hash', 255);
 
-            // Rol del usuario: administrador o entrenador.
+            // User role: administrator or coach.
             $table->string('role', 20);
         });
 
-        // Restringe los roles a los valores permitidos mediante una condición CHECK.
+        // Restricts the roles to the allowed values with a CHECK constraint.
         DB::statement("
             ALTER TABLE users
             ADD CONSTRAINT chk_users_role
@@ -36,7 +36,7 @@ return new class extends Migration
     }
 
     /**
-     * Elimina la tabla de usuarios al revertir esta migración.
+     * Drops the users table when this migration is rolled back.
      */
     public function down(): void
     {

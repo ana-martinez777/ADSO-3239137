@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Registra el alias para proteger rutas según el rol.
+        // Registers the alias used to protect routes by role.
         $middleware->alias(['role' => EnsureUserHasRole::class]);
 
         // API guests are never redirected to a login page: they receive a 401.
@@ -27,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn (Request $request) => $request->is('api/*') ? null : '/');
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // Convierte errores de aplicación al formato uniforme del contrato.
+        // Converts application errors to the contract's uniform format.
         $exceptions->render(function (ApiException $exception, Request $request) {
             if (!$request->is('api/*')) return null;
             return response()->json([
@@ -37,7 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ], $exception->httpStatus);
         });
 
-        // Devuelve errores de validación con código y detalles uniformes.
+        // Returns validation errors with a uniform code and details.
         $exceptions->render(function (ValidationException $exception, Request $request) {
             if (!$request->is('api/*')) return null;
             return response()->json([
@@ -47,7 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 422);
         });
 
-        // Estandariza las solicitudes sin autenticación válida.
+        // Standardizes requests without valid authentication.
         $exceptions->render(function (AuthenticationException $exception, Request $request) {
             if (!$request->is('api/*')) return null;
             return response()->json([
@@ -57,7 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 401);
         });
 
-        // Estandariza los errores de autorización.
+        // Standardizes authorization errors.
         $exceptions->render(function (AuthorizationException $exception, Request $request) {
             if (!$request->is('api/*')) return null;
             return response()->json([
@@ -67,9 +67,9 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 403);
         });
 
-        // Último recurso: cualquier error no controlado en la API responde con el
-        // formato uniforme y sin exponer SQL, trazas ni configuración (RNF-04).
-        // Laravel registra el detalle técnico en storage/logs/laravel.log.
+        // Last resort: any unhandled API error responds with the
+        // uniform format, without exposing SQL, traces or configuration (RNF-04).
+        // Laravel logs the technical detail in storage/logs/laravel.log.
         $exceptions->render(function (\Throwable $exception, Request $request) {
             if (!$request->is('api/*')) return null;
 

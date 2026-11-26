@@ -1,7 +1,7 @@
 <?php
 namespace App\Domain\Users;
 
-/** Representa un usuario sin depender de Eloquent ni de Laravel. */
+/** A user that does not depend on Eloquent or Laravel. */
 final class UserAccount
 {
     public function __construct(

@@ -11,7 +11,7 @@ final class RegisterCoach
 
     public function execute(string $username, string $plainPassword): UserAccount
     {
-        // Normaliza el nombre de usuario según el contrato.
+        // Normalizes the username as the contract requires.
         $username = strtolower(trim($username));
 
         if ($username === '') {
@@ -22,7 +22,7 @@ final class RegisterCoach
             throw new ApiException('USERNAME_ALREADY_EXISTS', 'El nombre de usuario ya está registrado.', 409);
         }
 
-        // El repositorio almacena la contraseña mediante el adaptador de hashing.
+        // The repository stores the password through the hashing adapter.
         return $this->users->createCoach($username, $plainPassword);
     }
 }

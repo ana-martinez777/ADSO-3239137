@@ -7,12 +7,11 @@ return [
     | Authentication Defaults
     |--------------------------------------------------------------------------
     |
-    | Define el mecanismo de autenticación predeterminado y el proveedor
-    | utilizado para la recuperación de contraseñas.
+    | Default authentication guard and the provider used to reset passwords.
     |
     */
 
-    // Establece JWT como mecanismo predeterminado de autenticación.
+    // JWT is the default authentication mechanism.
     'defaults' => [
         'guard' => env('AUTH_GUARD', 'api'),
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
@@ -23,17 +22,17 @@ return [
     | Authentication Guards
     |--------------------------------------------------------------------------
     |
-    | Define los mecanismos disponibles para autenticar las solicitudes.
-    | La API utiliza nuestro guard personalizado basado en JWT.
+    | Mechanisms available to authenticate requests.
+    | The API uses our custom JWT-based guard.
     |
     */
 
     'guards' => [
         'api' => [
-            // Utiliza el mecanismo JWT registrado en AppServiceProvider.
+            // Uses the JWT mechanism registered in AppServiceProvider.
             'driver' => 'jwt',
 
-            // Obtiene los usuarios mediante el proveedor Eloquent.
+            // Users are loaded through the Eloquent provider.
             'provider' => 'users',
         ],
     ],
@@ -43,16 +42,16 @@ return [
     | User Providers
     |--------------------------------------------------------------------------
     |
-    | Define cómo Laravel obtiene los usuarios desde la base de datos.
+    | How Laravel loads the users from the database.
     |
     */
 
     'providers' => [
         'users' => [
-            // Utiliza Eloquent para consultar los registros de usuarios.
+            // Uses Eloquent to query user records.
             'driver' => 'eloquent',
 
-            // Indica el modelo que representa a los usuarios.
+            // Model that represents the users.
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
     ],
@@ -62,22 +61,22 @@ return [
     | Resetting Passwords
     |--------------------------------------------------------------------------
     |
-    | Configuración de recuperación de contraseñas.
+    | Password reset settings.
     |
     */
 
     'passwords' => [
         'users' => [
-            // Utiliza el proveedor de usuarios definido anteriormente.
+            // Uses the user provider defined above.
             'provider' => 'users',
 
-            // Define la tabla donde se almacenan los tokens de recuperación.
+            // Table that stores the reset tokens.
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
 
-            // Establece la vigencia del token de recuperación en minutos.
+            // Validity of the reset token, in minutes.
             'expire' => 60,
 
-            // Establece el tiempo de espera entre solicitudes de recuperación.
+            // Waiting time between reset requests.
             'throttle' => 60,
         ],
     ],
@@ -87,11 +86,11 @@ return [
     | Password Confirmation Timeout
     |--------------------------------------------------------------------------
     |
-    | Tiempo máximo de validez de una confirmación de contraseña.
+    | Maximum validity of a password confirmation.
     |
     */
 
-    // Define el tiempo de espera en segundos.
+    // Timeout in seconds.
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
 ];

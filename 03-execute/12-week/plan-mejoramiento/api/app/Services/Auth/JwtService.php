@@ -8,14 +8,14 @@ use Firebase\JWT\Key;
 
 class JwtService implements TokenIssuer
 {
-    /** Genera un token JWT para el usuario autenticado. */
+    /** Issues a JWT for the authenticated user. */
     public function generate(UserAccount $user): string
     {
-        // Calcula los tiempos de emisión y expiración del token.
+        // Computes the issue and expiration times of the token.
         $now = time();
         $expiration = $now + (config('jwt.expiration') * 60);
 
-        // Incluye únicamente identificador y rol, sin datos personales.
+        // Includes only the identifier and the role, no personal data.
         $payload = [
             'iss' => config('app.url'),
             'sub' => $user->id,
@@ -27,7 +27,7 @@ class JwtService implements TokenIssuer
         return JWT::encode($payload, config('jwt.secret'), config('jwt.algorithm'));
     }
 
-    /** Verifica la firma y la expiración del token. */
+    /** Verifies the signature and the expiration of the token. */
     public function validate(string $token): object
     {
         return JWT::decode($token, new Key(config('jwt.secret'), config('jwt.algorithm')));

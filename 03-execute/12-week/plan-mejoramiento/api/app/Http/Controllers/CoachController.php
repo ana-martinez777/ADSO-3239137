@@ -13,10 +13,10 @@ class CoachController extends Controller
         private readonly ListCoaches $listCoaches,
     ) {}
 
-    /** Registra un entrenador; el cliente no puede elegir el rol. */
+    /** Registers a coach; the client cannot choose the role. */
     public function store(Request $request): JsonResponse
     {
-        // El caso de uso asigna siempre el rol coach.
+        // The use case always assigns the coach role.
         $data = $request->validate([
             'username' => ['required', 'string', 'max:120'],
             'password' => ['required', 'string'],
@@ -29,7 +29,7 @@ class CoachController extends Controller
         ], 201);
     }
 
-    /** Lista entrenadores y permite filtrar por nombre de usuario. */
+    /** Lists coaches, optionally filtered by username. */
     public function index(Request $request): JsonResponse
     {
         $data = $request->validate([

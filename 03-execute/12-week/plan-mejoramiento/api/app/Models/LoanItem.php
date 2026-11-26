@@ -10,7 +10,7 @@ class LoanItem extends Model
 {
     use HasVersion4Uuids;
 
-    // Define los campos que pueden asignarse masivamente.
+    // Fields that can be mass-assigned.
     protected $fillable = [
         'loan_id',
         'equipment_id',
@@ -21,10 +21,10 @@ class LoanItem extends Model
         'returned_at',
     ];
 
-    // La tabla no utiliza created_at ni updated_at.
+    // The table does not use created_at or updated_at.
     public $timestamps = false;
 
-    // Define los tipos de datos de las fechas.
+    // Data types of the date attributes.
     protected function casts(): array
     {
         return [
@@ -34,13 +34,13 @@ class LoanItem extends Model
         ];
     }
 
-    // Relaciona el detalle con su préstamo.
+    // The loan this item belongs to.
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);
     }
 
-    // Relaciona el detalle con el implemento prestado.
+    // The equipment that was loaned.
     public function equipment(): BelongsTo
     {
         return $this->belongsTo(Equipment::class);

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'secret' => env('JWT_SECRET'), // obtiene la clave privada desde .env
-    'algorithm' => 'HS256', // define HS256 para firmar y verificar los tokens.
-    'expiration' => 480, // establece las 8 horas.
+    'secret' => env('JWT_SECRET'), // reads the secret key from .env
+    'algorithm' => 'HS256', // HS256 is used to sign and verify the tokens.
+    'expiration' => 480, // sets 8 hours.
 ];

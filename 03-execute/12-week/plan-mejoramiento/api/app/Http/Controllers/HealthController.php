@@ -5,7 +5,7 @@ use Illuminate\Http\JsonResponse;
 
 class HealthController extends Controller
 {
-    /** Comprueba que la API se encuentra disponible. */
+    /** Checks that the API is available. */
     public function __invoke(): JsonResponse
     {
         return response()->json(['status' => 'ok'], 200);

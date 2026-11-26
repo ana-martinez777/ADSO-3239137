@@ -10,16 +10,16 @@ class Athlete extends Model
 {
     use HasVersion4Uuids;
 
-    // Define los atributos que pueden asignarse masivamente.
+    // Attributes that can be mass-assigned.
     protected $fillable = [
         'full_name',
         'document_number',
     ];
 
-    // Indica que la tabla no utiliza created_at ni updated_at.
+    // The table does not use created_at or updated_at.
     public $timestamps = false;
     
-    // Permite consultar todos los préstamos de un deportista.
+    // All loans of the athlete.
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);

@@ -9,10 +9,10 @@ class AuthController extends Controller
 {
     public function __construct(private readonly LoginUser $loginUser) {}
 
-    /** Autentica al usuario y devuelve el token JWT. */
+    /** Authenticates the user and returns the JWT. */
     public function login(Request $request): JsonResponse
     {
-        // Valida los campos antes de ejecutar el caso de uso.
+        // Validates the fields before running the use case.
         $data = $request->validate([
             'username' => ['required', 'string', 'max:120'],
             'password' => ['required', 'string'],

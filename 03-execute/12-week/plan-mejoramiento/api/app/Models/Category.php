@@ -10,15 +10,15 @@ class Category extends Model
 {
     use HasVersion4Uuids;
 
-    // Permite asignar el nombre de la categoría.
+    // Allows mass assignment of the category name.
     protected $fillable = [
         'name',
     ];
 
-    // Indica que la tabla no utiliza created_at ni updated_at.
+    // The table does not use created_at or updated_at.
     public $timestamps = false;
 
-    // Permite consultar los implementos pertenecientes a una categoría.
+    // Equipment that belongs to the category.
     public function equipment(): HasMany
     {
         return $this->hasMany(Equipment::class);

@@ -11,7 +11,7 @@ final class ListCoaches
     /** @return UserAccount[] */
     public function execute(?string $search = null): array
     {
-        // Convierte un filtro vacío en una consulta sin filtro.
+        // An empty filter becomes a query without filter.
         $search = $search !== null ? trim($search) : null;
         return $this->users->findCoaches($search === '' ? null : $search);
     }

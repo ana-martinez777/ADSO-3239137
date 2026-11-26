@@ -8,41 +8,41 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Crea la tabla de implementos deportivos.
+     * Creates the sports equipment table.
      */
     public function up(): void
     {
         Schema::create('equipment', function (Blueprint $table) {
 
-            // Identificador UUID v4 almacenado en 36 caracteres.
+            // UUID v4 stored in 36 characters.
             $table->char('id', 36)->primary();
 
-            // Referencia única que identifica cada implemento.
+            // Unique reference that identifies each piece of equipment.
             $table->string('reference', 120)->unique();
 
-            // Identificador de la categoría a la que pertenece.
+            // Category the equipment belongs to.
             $table->char('category_id', 36);
 
-            // Cantidad total de unidades del implemento.
+            // Total units of the equipment.
             $table->integer('total_units');
 
-            // Cantidad de unidades que están disponibles.
+            // Units currently available.
             $table->integer('available_units');
 
-            // Fecha de eliminación lógica; puede permanecer vacía.
+            // Soft-delete date; may stay empty.
             $table->dateTime('deleted_at', 6)->nullable();
 
-            // Relaciona el implemento con una categoría existente.
+            // Links the equipment with an existing category.
             $table->foreign('category_id')
                 ->references('id')
                 ->on('categories')
                 ->restrictOnDelete();
 
-            // Facilita las consultas por categoría y referencia.
+            // Speeds up queries by category and reference.
             $table->index(['category_id', 'reference']);
         });
 
-        // Garantiza que la cantidad total sea como mínimo una unidad.
+        // Ensures the total is at least one unit.
         DB::statement("
             ALTER TABLE equipment
             ADD CONSTRAINT chk_equipment_total_units
@@ -56,7 +56,7 @@ return new class extends Migration
             CHECK (available_units >= 0)
         ");
 
-        // Impide que las unidades disponibles superen el total.
+        // Prevents available units from exceeding the total.
         DB::statement("
             ALTER TABLE equipment
             ADD CONSTRAINT chk_equipment_available_units_max
@@ -65,7 +65,7 @@ return new class extends Migration
     }
 
     /**
-     * Elimina la tabla de implementos al revertir esta migración.
+     * Drops the equipment table when this migration is rolled back.
      */
     public function down(): void
     {

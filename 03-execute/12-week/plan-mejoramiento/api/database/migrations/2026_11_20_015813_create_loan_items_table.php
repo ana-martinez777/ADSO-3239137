@@ -8,55 +8,55 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Crea la tabla que almacena los detalles de cada préstamo.
+     * Creates the table that stores the items of each loan.
      */
     public function up(): void
     {
         Schema::create('loan_items', function (Blueprint $table) {
 
-            // Identificador UUID v4 del detalle del préstamo.
+            // UUID v4 of the loan item.
             $table->char('id', 36)->primary();
 
-            // Identificador del préstamo al que pertenece este detalle.
+            // Loan this item belongs to.
             $table->char('loan_id', 36);
 
-            // Identificador del implemento deportivo prestado.
+            // Equipment that was loaned.
             $table->char('equipment_id', 36);
 
-            // Conserva la referencia que tenía el implemento al prestarse.
+            // Keeps the reference the equipment had when it was loaned.
             $table->string('equipment_reference', 120);
 
-            // Conserva el nombre de la categoría al momento del préstamo.
+            // Keeps the category name at the time of the loan.
             $table->string('category_name', 120);
 
-            // Cantidad de unidades prestadas.
+            // Number of units loaned.
             $table->integer('quantity');
 
-            // Fecha y hora límite para devolver las unidades.
+            // Deadline to return the units.
             $table->dateTime('due_at', 6);
 
-            // Fecha y hora de devolución; permanece vacía mientras no se devuelva.
+            // Return date and time; empty until the item is returned.
             $table->dateTime('returned_at', 6)->nullable();
 
-            // Relaciona el detalle con su préstamo.
+            // The loan this item belongs to.
             $table->foreign('loan_id')
                 ->references('id')
                 ->on('loans')
                 ->restrictOnDelete();
 
-            // Relaciona el detalle con el implemento correspondiente.
+            // Links the item with its equipment.
             $table->foreign('equipment_id')
                 ->references('id')
                 ->on('equipment')
                 ->restrictOnDelete();
 
-            // Evita registrar el mismo implemento dos veces en un préstamo.
+            // Prevents the same equipment from appearing twice in one loan.
             $table->unique(['loan_id', 'equipment_id']);
 
-            // Facilita las consultas de préstamos por implemento.
+            // Speeds up loan queries by equipment.
             $table->index('equipment_id');
 
-            // Facilita las consultas de devoluciones y vencimientos.
+            // Speeds up queries on returns and due dates.
             $table->index(['returned_at', 'due_at']);
         });
 
@@ -69,7 +69,7 @@ return new class extends Migration
     }
 
     /**
-     * Elimina la tabla de detalles de préstamos al revertir esta migración.
+     * Drops the loan items table when this migration is rolled back.
      */
     public function down(): void
     {

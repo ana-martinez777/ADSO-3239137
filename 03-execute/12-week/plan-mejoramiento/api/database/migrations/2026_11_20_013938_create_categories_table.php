@@ -7,22 +7,22 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Crea la tabla de categorías.
+     * Creates the categories table.
      */
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
 
-            // Identificador UUID v4 almacenado en 36 caracteres.
+            // UUID v4 stored in 36 characters.
             $table->char('id', 36)->primary();
 
-            // Nombre único de la categoría.
+            // Unique category name.
             $table->string('name', 120)->unique();
         });
     }
 
     /**
-     * Elimina la tabla de categorías al revertir esta migración.
+     * Drops the categories table when this migration is rolled back.
      */
     public function down(): void
     {

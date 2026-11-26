@@ -21,14 +21,14 @@ final class EloquentUserRepository implements UserRepository
     public function createCoach(string $username, string $passwordHash): UserAccount
     {
         try {
-            // El adaptador genera el hash; el modelo recibe el hash ya calculado.
+            // The adapter creates the hash; the model receives it already computed.
             $user = User::query()->create([
                 'username' => $username,
                 'password_hash' => $this->passwords->hash($passwordHash),
                 'role' => 'coach',
             ]);
         } catch (QueryException $exception) {
-            // La restricción UNIQUE también protege frente a registros simultáneos.
+            // The UNIQUE constraint also protects against concurrent registrations.
             if (($exception->errorInfo[0] ?? null) === '23000') {
                 throw new ApiException('USERNAME_ALREADY_EXISTS', 'El nombre de usuario ya está registrado.', 409);
             }

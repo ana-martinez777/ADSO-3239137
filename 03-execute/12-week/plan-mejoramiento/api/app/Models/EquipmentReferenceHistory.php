@@ -8,28 +8,28 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EquipmentReferenceHistory extends Model
 {
-    // Indica el nombre exacto de la tabla en MySQL.
+    // Exact table name in MySQL.
     protected $table = 'equipment_reference_history';
 
-    // Indica que la clave primaria se llama reference.
+    // The primary key is the reference.
     protected $primaryKey = 'reference';
 
-    // La clave primaria es de tipo texto.
+    // The primary key is a string.
     protected $keyType = 'string';
 
-    // La clave primaria no se genera automáticamente.
+    // The primary key is not auto-generated.
     public $incrementing = false;
 
-    // Define los campos que pueden asignarse masivamente.
+    // Fields that can be mass-assigned.
     protected $fillable = [
         'reference',
         'equipment_id',
     ];
 
-    // La tabla no utiliza created_at ni updated_at.
+    // The table does not use created_at or updated_at.
     public $timestamps = false;
 
-    // Relaciona la referencia histórica con su implemento.
+    // The equipment this historical reference belongs to.
     public function equipment(): BelongsTo
     {
         return $this->belongsTo(Equipment::class);

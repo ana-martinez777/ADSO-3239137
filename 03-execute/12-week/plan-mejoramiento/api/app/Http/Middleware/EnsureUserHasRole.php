@@ -8,12 +8,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserHasRole
 {
-    /** Restringe la ruta a los roles indicados. */
+    /** Restricts the route to the given roles. */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         $user = $request->user();
 
-        // Comprueba el rol del usuario recuperado por el guard JWT.
+        // Checks the role of the user resolved by the JWT guard.
         if (!$user || !in_array($user->role, $roles, true)) {
             throw new ApiException(
                 'FORBIDDEN_ROLE',
