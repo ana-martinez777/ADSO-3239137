@@ -1,12 +1,14 @@
 # Laravel API on PHP 8.4 with Apache. Build context: plan-mejoramiento/
+# libfaketime is only activated by the "api-past" service used by the seeder.
 FROM composer:2 AS composer
 
 FROM php:8.4-apache
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends unzip curl \
+    && apt-get install -y --no-install-recommends unzip curl libfaketime \
     && docker-php-ext-install pdo_mysql \
     && a2enmod rewrite headers \
+    && ln -s "$(dpkg -L libfaketime | grep 'libfaketime.so.1$' | head -n 1)" /usr/local/lib/libfaketime.so.1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer

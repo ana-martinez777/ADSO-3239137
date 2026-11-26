@@ -1,7 +1,42 @@
 # Sports Gear: MySQL database, Laravel API, React app and public site.
 # Start everything from plan-mejoramiento/ with:
 #   docker compose -f infra/docker-compose.yml up --build
+# Load demo data (T-21) with:
+#   docker compose -f infra/docker-compose.yml --profile seed run --rm seeder
 name: sports-gear
+
+x-api-build: &api-build
+  context: ..
+  dockerfile: infra/docker/api/Dockerfile
+
+x-api-environment: &api-environment
+  APP_NAME: "Sports Gear"
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_KEY: ${APP_KEY:-}
+  APP_URL: http://localhost:${API_PORT:-8000}
+  LOG_CHANNEL: stderr
+  LOG_LEVEL: warning
+  DB_CONNECTION: mysql
+  DB_HOST: db
+  DB_PORT: 3306
+  DB_DATABASE: ${DB_DATABASE:-sports_gear}
+  DB_USERNAME: ${DB_USERNAME:-sports_gear}
+  DB_PASSWORD: ${DB_PASSWORD}
+  CACHE_STORE: file
+  SESSION_DRIVER: array
+  QUEUE_CONNECTION: sync
+  HASH_DRIVER: argon2id
+  JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in infra/.env}
+  SPORTS_GEAR_ADMIN_USERNAME: ${SPORTS_GEAR_ADMIN_USERNAME:-admin}
+  SPORTS_GEAR_ADMIN_PASSWORD: ${SPORTS_GEAR_ADMIN_PASSWORD:?Set SPORTS_GEAR_ADMIN_PASSWORD in infra/.env}
+
+x-api-healthcheck: &api-healthcheck
+  test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/api/v1/health || exit 1"]
+  interval: 5s
+  timeout: 5s
+  retries: 30
+  start_period: 30s
 
 services:
   db:
@@ -22,42 +57,16 @@ services:
       start_period: 20s
 
   api:
-    build:
-      context: ..
-      dockerfile: infra/docker/api/Dockerfile
+    build: *api-build
+    image: sports-gear-api:local
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      APP_NAME: "Sports Gear"
-      APP_ENV: production
-      APP_DEBUG: "false"
-      APP_KEY: ${APP_KEY:-}
-      APP_URL: http://localhost:${API_PORT:-8000}
-      LOG_CHANNEL: stderr
-      LOG_LEVEL: warning
-      DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-sports_gear}
-      DB_USERNAME: ${DB_USERNAME:-sports_gear}
-      DB_PASSWORD: ${DB_PASSWORD}
-      CACHE_STORE: file
-      SESSION_DRIVER: array
-      QUEUE_CONNECTION: sync
-      HASH_DRIVER: argon2id
-      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in infra/.env}
-      SPORTS_GEAR_ADMIN_USERNAME: ${SPORTS_GEAR_ADMIN_USERNAME:-admin}
-      SPORTS_GEAR_ADMIN_PASSWORD: ${SPORTS_GEAR_ADMIN_PASSWORD:?Set SPORTS_GEAR_ADMIN_PASSWORD in infra/.env}
+    environment: *api-environment
     ports:
       - "${API_PORT:-8000}:80"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/api/v1/health || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-      start_period: 30s
+    healthcheck: *api-healthcheck
 
   app:
     build:
@@ -77,6 +86,41 @@ services:
       - ../page:/usr/share/nginx/html:ro
     ports:
       - "${PAGE_PORT:-8081}:80"
+
+  # Same API image with its clock 3 days behind. Only the seeder uses it, to
+  # register loans that are already overdue through the API. No host port.
+  api-past:
+    profiles: ["seed"]
+    build: *api-build
+    image: sports-gear-api:local
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      <<: *api-environment
+      LD_PRELOAD: /usr/local/lib/libfaketime.so.1
+      FAKETIME: "-3d"
+      FAKETIME_DONT_FAKE_MONOTONIC: "1"
+    healthcheck: *api-healthcheck
+
+  seeder:
+    profiles: ["seed"]
+    image: node:22-alpine
+    working_dir: /tool
+    volumes:
+      - ../tool:/tool:ro
+    command: ["node", "src/seed.js"]
+    depends_on:
+      api:
+        condition: service_healthy
+      api-past:
+        condition: service_healthy
+    environment:
+      API_URL: http://api/api/v1
+      API_PAST_URL: http://api-past/api/v1
+      SPORTS_GEAR_ADMIN_USERNAME: ${SPORTS_GEAR_ADMIN_USERNAME:-admin}
+      SPORTS_GEAR_ADMIN_PASSWORD: ${SPORTS_GEAR_ADMIN_PASSWORD}
+      SEED_COACH_PASSWORD: ${SEED_COACH_PASSWORD:?Set SEED_COACH_PASSWORD in infra/.env}
 
 volumes:
   db-data:
